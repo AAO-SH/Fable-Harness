@@ -13,11 +13,13 @@ The harness is instructional plus mechanical: root instructions load the operati
 
 ## Quick Start
 
-Run the installer from this skill:
+When a user asks to install or update Fable Harness, run the installer from this skill. Do not stop at explaining the command.
 
 ```powershell
 python "<skill-dir>\scripts\install_fable_harness.py" "<project-root>" --agent codex
 ```
+
+Use the directory containing this `SKILL.md` as `<skill-dir>`. Use the current workspace as `<project-root>` unless the user names another target. If the user does not choose an agent mode, use `auto`.
 
 Agent options:
 

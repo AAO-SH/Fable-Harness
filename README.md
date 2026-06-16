@@ -1,4 +1,9 @@
-﻿# Fable Harness
+# Fable Harness
+
+[![Publish](https://github.com/AAO-SH/Fable-Harness/actions/workflows/publish-package.yml/badge.svg)](https://github.com/AAO-SH/Fable-Harness/actions/workflows/publish-package.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Node >=18](https://img.shields.io/badge/node-%3E%3D18-43853d.svg)
+![Python >=3.9](https://img.shields.io/badge/python-%3E%3D3.9-3776ab.svg)
 
 Fable Harness is a project-local agent harness for Codex, Claude Code, and compatible AI agent workflows. It installs lightweight operating instructions, templates, and scripts that help an agent follow a traceable decision loop instead of improvising hidden process state.
 
@@ -12,21 +17,19 @@ Fable Harness is a project-local agent harness for Codex, Claude Code, and compa
 
 ## Install into a project
 
-Run the installer directly from this repository:
+The preferred path is to call the skill from your agent and ask it to install the harness into the current workspace:
+
+```text
+Use the fable-harness skill to install this workspace for Codex.
+```
+
+If you are installing manually, run the installer directly from this repository:
 
 ```powershell
 python ".\scripts\install_fable_harness.py" "C:\path\to\project" --agent codex
 ```
 
-Or use a package manager:
-
-```powershell
-npx @aao-sh/fable-harness "C:\path\to\project" --agent codex
-yarn dlx @aao-sh/fable-harness "C:\path\to\project" --agent codex
-pip install fable-harness
-fable-harness "C:\path\to\project" --agent codex
-python -m fable_harness "C:\path\to\project" --agent codex
-```
+Package-manager entry points are available for automation, but direct skill invocation is the intended interactive install path.
 
 Agent modes:
 
