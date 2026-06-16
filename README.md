@@ -24,10 +24,19 @@ fable-harness/
 
 ## Install into a project
 
-Run the installer from this repository:
+Run the installer directly from this repository:
 
 ```powershell
 python ".\scripts\install_fable_harness.py" "C:\path\to\project" --agent codex
+```
+
+Or install/run it from GitHub Packages after authenticating npm to
+`npm.pkg.github.com`:
+
+```powershell
+npm config set @aao-sh:registry https://npm.pkg.github.com
+npm login --scope=@aao-sh --registry=https://npm.pkg.github.com
+npx @aao-sh/fable-harness "C:\path\to\project" --agent codex
 ```
 
 Agent modes:
@@ -64,7 +73,19 @@ Run the bundled test suite:
 python ".\scripts\test_install_fable_harness.py"
 ```
 
+Check the npm package contents before publishing:
+
+```powershell
+npm run pack:check
+```
+
 The tests install the harness into temporary workspaces and verify that generated instructions, templates, scripts, and closure checks behave as expected.
+
+## GitHub Packages
+
+This repository is configured to publish `@aao-sh/fable-harness` to GitHub
+Packages. Publishing is handled by `.github/workflows/publish-package.yml` on a
+published GitHub Release or by manual workflow dispatch.
 
 ## License
 
