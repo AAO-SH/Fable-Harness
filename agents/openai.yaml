@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fable Harness"
+  short_description: "Install local agent harness"
+  default_prompt: "Use $fable-harness to install the local decision-loop harness in this workspace."
