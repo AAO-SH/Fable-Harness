@@ -17,9 +17,17 @@ fable-harness/
   SKILL.md
   agents/
     openai.yaml
+  bin/
+    fable-harness.mjs
   scripts/
     install_fable_harness.py
     test_install_fable_harness.py
+  src/
+    fable_harness/
+      installer.py
+      cli.py
+  package.json
+  pyproject.toml
 ```
 
 ## Install into a project
@@ -30,13 +38,33 @@ Run the installer directly from this repository:
 python ".\scripts\install_fable_harness.py" "C:\path\to\project" --agent codex
 ```
 
-Or install/run it from GitHub Packages after authenticating npm to
+Or install/run it from GitHub Packages with npm after authenticating to
 `npm.pkg.github.com`:
 
 ```powershell
 npm config set @aao-sh:registry https://npm.pkg.github.com
 npm login --scope=@aao-sh --registry=https://npm.pkg.github.com
 npx @aao-sh/fable-harness "C:\path\to\project" --agent codex
+```
+
+Yarn can use the same GitHub Packages registry:
+
+```powershell
+yarn config set npmScopes.aao-sh.npmRegistryServer https://npm.pkg.github.com
+yarn config set npmScopes.aao-sh.npmAlwaysAuth true
+yarn npm login --scope @aao-sh
+yarn dlx @aao-sh/fable-harness "C:\path\to\project" --agent codex
+```
+
+You can also copy `.yarnrc.example.yml` to `.yarnrc.yml` and authenticate with
+your GitHub Packages token.
+
+The Python package exposes the same installer entry point:
+
+```powershell
+pip install fable-harness
+fable-harness "C:\path\to\project" --agent codex
+python -m fable_harness "C:\path\to\project" --agent codex
 ```
 
 Agent modes:
@@ -79,13 +107,33 @@ Check the npm package contents before publishing:
 npm run pack:check
 ```
 
+Check the Python package contents before publishing:
+
+```powershell
+python -m pip install build twine
+python -m build
+python -m twine check dist/*
+```
+
 The tests install the harness into temporary workspaces and verify that generated instructions, templates, scripts, and closure checks behave as expected.
 
-## GitHub Packages
+## Package publishing
 
-This repository is configured to publish `@aao-sh/fable-harness` to GitHub
-Packages. Publishing is handled by `.github/workflows/publish-package.yml` on a
-published GitHub Release or by manual workflow dispatch.
+This repository is configured for:
+
+- GitHub Packages / npm: `@aao-sh/fable-harness`
+- Yarn consumers through the same npm package registry
+- PyPI: `fable-harness`
+
+Manual publishing commands:
+
+```powershell
+npm publish
+python -m twine upload dist/*
+```
+
+GitHub Actions publishing can be added later by a maintainer token with the
+`workflow` scope.
 
 ## License
 

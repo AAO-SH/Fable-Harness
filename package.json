@@ -4,6 +4,7 @@
   "description": "Project-local agent harness skill for traceable AI workflows.",
   "type": "module",
   "license": "MIT",
+  "packageManager": "yarn@4.9.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AAO-SH/Fable-Harness.git"
@@ -21,11 +22,16 @@
     "SKILL.md",
     "agents/",
     "scripts/",
-    "bin/"
+    "bin/",
+    "src/fable_harness/*.py",
+    "src/fable_harness/py.typed",
+    "pyproject.toml",
+    ".yarnrc.example.yml"
   ],
   "scripts": {
     "test": "python scripts/test_install_fable_harness.py",
-    "pack:check": "npm pack --dry-run"
+    "pack:check": "npm pack --dry-run",
+    "yarn:pack:check": "yarn pack --dry-run"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

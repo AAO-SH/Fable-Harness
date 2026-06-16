@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import tempfile
@@ -6,6 +7,8 @@ from pathlib import Path
 
 
 SCRIPT = Path(__file__).with_name("install_fable_harness.py")
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
 
 
 class InstallFableHarnessTest(unittest.TestCase):
@@ -15,6 +18,17 @@ class InstallFableHarnessTest(unittest.TestCase):
             text=True,
             capture_output=True,
             check=False,
+        )
+
+    def run_module_install(self, root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(SRC)
+        return subprocess.run(
+            [sys.executable, "-m", "fable_harness", str(root), *args],
+            text=True,
+            capture_output=True,
+            check=False,
+            env=env,
         )
 
     def test_installs_codex_harness_and_preserves_existing_agents_md(self):
@@ -116,6 +130,16 @@ class InstallFableHarnessTest(unittest.TestCase):
             self.assertTrue((root / ".agents" / "templates" / "decision-trace.md").is_file())
             self.assertFalse((root / ".codex").exists())
             self.assertFalse((root / ".claude").exists())
+
+    def test_python_module_entrypoint_installs_harness(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            result = self.run_module_install(root, "--agent", "codex")
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((root / "AGENTS.md").is_file())
+            self.assertTrue((root / ".codex" / "scripts" / "check-closure.py").is_file())
 
     def test_generated_scripts_create_trace_and_validate_closure(self):
         with tempfile.TemporaryDirectory() as tmp:
