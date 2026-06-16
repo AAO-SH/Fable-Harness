@@ -1,0 +1,113 @@
+name: Publish packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      publish_pypi:
+        description: Publish to PyPI when PYPI_API_TOKEN is configured
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify package artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: https://npm.pkg.github.com
+          scope: "@aao-sh"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Enable Yarn via Corepack
+        run: corepack enable
+
+      - name: Run installer tests
+        run: python scripts/test_install_fable_harness.py
+
+      - name: Check Node entry point
+        run: node bin/fable-harness.mjs --help
+
+      - name: Check Python module entry point
+        run: PYTHONPATH=src python -m fable_harness --help
+
+      - name: Check npm package contents
+        run: npm pack --dry-run
+
+      - name: Check Yarn package contents
+        run: yarn pack --dry-run
+
+      - name: Build Python package
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          python -m twine check dist/*
+
+  publish-github-packages:
+    name: Publish npm package to GitHub Packages
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js for GitHub Packages
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: https://npm.pkg.github.com
+          scope: "@aao-sh"
+
+      - name: Publish npm package
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-pypi:
+    name: Publish Python package to PyPI
+    needs: verify
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || inputs.publish_pypi == true }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Python package
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          python -m twine check dist/*
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          if [ -z "$TWINE_PASSWORD" ]; then
+            echo "PYPI_API_TOKEN is not configured; skipping PyPI publish."
+            exit 0
+          fi
+          python -m twine upload dist/*

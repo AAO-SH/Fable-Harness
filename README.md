@@ -132,8 +132,13 @@ npm publish
 python -m twine upload dist/*
 ```
 
-GitHub Actions publishing can be added later by a maintainer token with the
-`workflow` scope.
+GitHub Actions publishing is configured in
+`.github/workflows/publish-package.yml`:
+
+- GitHub Releases publish the npm package to GitHub Packages.
+- Manual workflow dispatch verifies package artifacts and can publish PyPI when
+  `publish_pypi` is enabled.
+- PyPI upload requires the repository secret `PYPI_API_TOKEN`.
 
 ## License
 
