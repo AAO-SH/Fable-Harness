@@ -1,0 +1,4 @@
+npmScopes:
+  aao-sh:
+    npmRegistryServer: "https://npm.pkg.github.com"
+    npmAlwaysAuth: true
