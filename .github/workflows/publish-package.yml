@@ -5,6 +5,16 @@ on:
     types: [published]
   workflow_dispatch:
     inputs:
+      publish_github_packages:
+        description: Publish npm package to GitHub Packages
+        required: false
+        type: boolean
+        default: true
+      publish_npmjs:
+        description: Publish npm package to npmjs
+        required: false
+        type: boolean
+        default: true
       publish_pypi:
         description: Publish to PyPI when PYPI_API_TOKEN is configured
         required: false
@@ -37,8 +47,8 @@ jobs:
       - name: Enable Yarn via Corepack
         run: corepack enable
 
-      - name: Run installer tests
-        run: python scripts/test_install_fable_harness.py
+      - name: Run Python tests
+        run: python -m unittest discover scripts "test_*.py"
 
       - name: Check Node entry point
         run: node bin/fable-harness.mjs --help
@@ -61,6 +71,7 @@ jobs:
   publish-github-packages:
     name: Publish npm package to GitHub Packages
     needs: verify
+    if: ${{ github.event_name == 'release' || inputs.publish_github_packages == true }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -80,6 +91,50 @@ jobs:
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-npmjs:
+    name: Publish npm package to npmjs
+    needs: verify
+    if: ${{ github.event_name == 'release' || inputs.publish_npmjs == true }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js for npmjs
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: https://registry.npmjs.org
+          scope: "@aao-sh"
+
+      - name: Validate npmjs token
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN is not configured. Add an npm automation token named NPM_TOKEN before publishing to npmjs."
+            exit 1
+          fi
+
+      - name: Prepare package metadata for npmjs
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          pkg.publishConfig = pkg.publishConfig || {};
+          pkg.publishConfig.registry = "https://registry.npmjs.org";
+          pkg.publishConfig.access = "public";
+          fs.writeFileSync("package.json", `${JSON.stringify(pkg, null, 2)}\n`);
+          NODE
+
+      - name: Publish npm package to npmjs
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-pypi:
     name: Publish Python package to PyPI

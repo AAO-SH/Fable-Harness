@@ -62,10 +62,19 @@ Use `.claude\scripts\...` for Claude installs or `.agents\scripts\...` for neutr
 Run the bundled test suite:
 
 ```powershell
-python ".\scripts\test_install_fable_harness.py"
+python -m unittest discover ".\scripts" "test_*.py"
 ```
 
 The tests install the harness into temporary workspaces and verify that generated instructions, templates, scripts, and closure checks behave as expected.
+
+## Publishing
+
+Release publishing keeps GitHub Packages as the package default in `package.json`, then publishes a separate npmjs copy from CI.
+
+- GitHub Packages uses the repository `GITHUB_TOKEN`.
+- npmjs requires a repository secret named `NPM_TOKEN`.
+- The npmjs job rewrites `publishConfig.registry` to `https://registry.npmjs.org` inside the CI workspace before running `npm publish --access public --provenance`.
+- To backfill an existing release to npmjs, run the workflow manually with `publish_npmjs=true` and `publish_github_packages=false`.
 
 ## License
 
