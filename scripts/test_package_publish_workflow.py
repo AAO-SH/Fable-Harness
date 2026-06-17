@@ -26,7 +26,10 @@ class PackagePublishWorkflowTest(unittest.TestCase):
 
         self.assertIn("publish-npmjs:", self.workflow)
         self.assertIn("registry-url: https://registry.npmjs.org", self.workflow)
-        self.assertIn("NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}", self.workflow)
+        self.assertIn(
+            "NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.FABLE_HARNESS_GITHUB_ACTIONS }}",
+            self.workflow,
+        )
         self.assertRegex(
             self.workflow,
             re.compile(
@@ -40,7 +43,12 @@ class PackagePublishWorkflowTest(unittest.TestCase):
         npmjs_job = self.workflow.split("publish-npmjs:", 1)[1]
         self.assertIn("publishConfig.registry", npmjs_job)
         self.assertIn("https://registry.npmjs.org", npmjs_job)
-        self.assertIn("NPM_TOKEN is not configured", npmjs_job)
+        self.assertIn("NPM_TOKEN or FABLE_HARNESS_GITHUB_ACTIONS is not configured", npmjs_job)
+
+    def test_npmjs_job_accepts_existing_repository_secret_name(self):
+        npmjs_job = self.workflow.split("publish-npmjs:", 1)[1]
+        self.assertIn("secrets.FABLE_HARNESS_GITHUB_ACTIONS", npmjs_job)
+        self.assertEqual(npmjs_job.count("secrets.FABLE_HARNESS_GITHUB_ACTIONS"), 2)
 
     def test_manual_dispatch_can_publish_only_to_npmjs_for_backfill(self):
         self.assertIn("publish_github_packages:", self.workflow)

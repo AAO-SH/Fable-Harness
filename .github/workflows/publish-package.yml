@@ -113,10 +113,10 @@ jobs:
 
       - name: Validate npmjs token
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.FABLE_HARNESS_GITHUB_ACTIONS }}
         run: |
           if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::error::NPM_TOKEN is not configured. Add an npm automation token named NPM_TOKEN before publishing to npmjs."
+            echo "::error::NPM_TOKEN or FABLE_HARNESS_GITHUB_ACTIONS is not configured. Add an npm automation token before publishing to npmjs."
             exit 1
           fi
 
@@ -134,7 +134,7 @@ jobs:
       - name: Publish npm package to npmjs
         run: npm publish --access public --provenance
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.FABLE_HARNESS_GITHUB_ACTIONS }}
 
   publish-pypi:
     name: Publish Python package to PyPI

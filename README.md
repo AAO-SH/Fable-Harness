@@ -72,7 +72,7 @@ The tests install the harness into temporary workspaces and verify that generate
 Release publishing keeps GitHub Packages as the package default in `package.json`, then publishes a separate npmjs copy from CI.
 
 - GitHub Packages uses the repository `GITHUB_TOKEN`.
-- npmjs requires a repository secret named `NPM_TOKEN`.
+- npmjs requires a repository secret named `NPM_TOKEN`; this repository also accepts `FABLE_HARNESS_GITHUB_ACTIONS` as a fallback for the existing npm automation token.
 - The npmjs job rewrites `publishConfig.registry` to `https://registry.npmjs.org` inside the CI workspace before running `npm publish --access public --provenance`.
 - To backfill an existing release to npmjs, run the workflow manually with `publish_npmjs=true` and `publish_github_packages=false`.
 
