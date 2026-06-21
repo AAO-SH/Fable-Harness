@@ -112,6 +112,8 @@ The installer preserves existing root instructions and updates only the marked `
 
 - Read project instructions first, then compact semantic notes, then only selected traces when audit is needed, then real project files before edits.
 - At boot, run `release-notice.py check` when available. It checks at most once every 24 hours and only prints when a newer GitHub release exists; it never downloads or applies updates.
+- When the user asks to save, memorize, remember, store, register, persist, or update project context, the installed project-local harness surface is mandatory. Use `.codex/`, `.claude/`, or `.agents/` first; global/model memory, user-level agent storage, chat summaries, or external notes may only be additional mirrors.
+- For local durable memory work, use the installed scripts such as `new-note.py`, `promote-trace.py`, `rebuild-memory.py`, and `memory-touch.py`; prefer local harness scripts over equivalent global or model-native memory actions whenever they exist.
 - Use the Recall Ladder for non-trivial recall: `memory-search.py`, `rag-pipeline.py` for memory-heavy cited source inspection, lightweight `source-arbitrate.py` before RAG-informed code/doc edits, `notes/_index.md`, compact active notes, `memory-touch.py`, `graph-query.py --q`, dormant search, traces only when needed, project docs/source files, then closure maintenance.
 - Do not create a plan from an empty evidence base. If local memory, notes, traces, docs, and source files do not provide a verifiable structured source, research the web before planning.
 - Use primary or official web sources when available, record links or citations in the trace, and treat web results as planning evidence only when they are relevant, credible, and specific.

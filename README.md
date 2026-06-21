@@ -22,6 +22,7 @@ Fable Harness is a project-local agent harness for Codex, Claude Code, and compa
 - Warns, at most once every 24 hours, when a newer GitHub release is available.
 - Closes or justifies completed subagent sessions before final loop closure.
 - Creates reviewable Memory Dreaming runs that track memory use, consolidate memory, copy promoted evidence into dormant storage, and reactivate compact notes on demand.
+- Requires project-local harness memory for save, memorize, register, or persist requests; global/model memory can be an extra mirror, not a replacement.
 - Preserves existing root instructions and only updates the marked `fable-harness` block.
 - Protects TDD audit rails by making pre-implementation tests explicit evidence rather than disposable scaffolding.
 - Can install Superpowers as a project-local companion skill library when it is absent or outdated.
@@ -169,6 +170,8 @@ Search dormant memory and reactivate a compact note:
 python ".codex\scripts\memory-dream.py" search-dormant --root "." --query "old release decision" --json
 python ".codex\scripts\memory-dream.py" reactivate --root "." --query "old release decision" --category decisions --area memory --topic old-release-decision --apply
 ```
+
+The generated agent instructions require Project-Local Harness Scope: when the user asks to save, memorize, remember, store, register, persist, or update project context, the agent must use the installed local harness surface first (`.codex/`, `.claude/`, or `.agents/`). Global/model memory, user-level agent storage, external notes, or chat summaries may be extra mirrors, but they do not replace local notes, traces, rebuilds, and touch tracking.
 
 The generated agent instructions include a Recall Ladder for non-trivial work: hybrid memory search, retrieval pipeline with cited source inspection, notes index, compact active notes, touch tracking, graph lookup, dormant search, traces only when needed, then project docs/source files. When RAG informs a task that may edit code or docs, the agent runs a lightweight source-arbitration check against real project files; material conflicts become an Evidence Dispute with user approval before replacing project facts with RAG-derived facts. If local sources do not provide a verifiable structured basis, the agent must research the web before planning; if strong web references are still unavailable for a new task, it interviews the user before creating a plan. For non-trivial programming work, Programming Recall combines semantic memory with Code Graph before edits: semantic recall explains why, Code Graph maps where and what may break, and source files remain the final operational authority. Closure then promotes durable decisions, rebuilds memory, runs strict maintenance, and runs agent-reviewed dream maintenance when memory-heavy.
 

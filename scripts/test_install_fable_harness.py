@@ -4,7 +4,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 
@@ -142,6 +144,42 @@ release packaging, version markers, and a normal closure check.
             self.assertIn("semantic recall explains why", text, str(path))
             self.assertIn("Code Graph maps where and what may break", text, str(path))
             self.assertIn("source files remain the final operational authority", text, str(path))
+
+    def test_generated_instructions_require_project_local_harness_for_memory_actions(self):
+        cases = [
+            ("codex", "AGENTS.md", ".codex"),
+            ("claude", "CLAUDE.md", ".claude"),
+            ("any", "AGENTS.md", ".agents"),
+        ]
+        for agent, instruction_file, local_dir in cases:
+            with self.subTest(agent=agent):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    result = self.run_install(root, "--agent", agent)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+                    text = (root / instruction_file).read_text(encoding="utf-8")
+                    self.assertIn("### Project-Local Harness Scope", text)
+                    scope_section = text.split("### Project-Local Harness Scope", 1)[1].split(
+                        "### Recall Ladder",
+                        1,
+                    )[0]
+                    self.assertIn(
+                        f"When the user asks to save, memorize, remember, store, register, persist, or update project context, use `{local_dir}/` first.",
+                        scope_section,
+                    )
+                    self.assertIn(
+                        f"Do not satisfy those requests only through global model memory, external notes, chat summary, or user-level agent storage; those may be extra mirrors, but `{local_dir}/` is mandatory.",
+                        scope_section,
+                    )
+                    self.assertIn(
+                        f"Use `{local_dir}/scripts/new-note.py`, `{local_dir}/scripts/promote-trace.py`, `{local_dir}/scripts/rebuild-memory.py`, and `{local_dir}/scripts/memory-touch.py` for local durable memory work.",
+                        scope_section,
+                    )
+                    self.assertIn(
+                        f"When any Fable Harness feature exists locally, prefer the local `{local_dir}/scripts/` tool over an equivalent global or model-native memory action.",
+                        scope_section,
+                    )
 
     def test_installs_codex_harness_and_preserves_existing_agents_md(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -372,10 +410,10 @@ release packaging, version markers, and a normal closure check.
             install = self.run_install(root, "--agent", "codex")
             self.assertEqual(install.returncode, 0, install.stderr)
 
-            latest_v030 = json.dumps(
+            latest_v040 = json.dumps(
                 {
-                    "tag_name": "v0.3.0",
-                    "html_url": "https://github.com/AAO-SH/fable-harness/releases/tag/v0.3.0",
+                    "tag_name": "v0.4.0",
+                    "html_url": "https://github.com/AAO-SH/fable-harness/releases/tag/v0.4.0",
                 }
             )
             first = self.run_codex_script(
@@ -383,21 +421,21 @@ release packaging, version markers, and a normal closure check.
                 "release-notice.py",
                 "check",
                 "--latest-json",
-                latest_v030,
+                latest_v040,
                 "--now",
                 "2026-06-20T00:00:00+00:00",
             )
 
             self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
             self.assertIn("Fable Harness update available", first.stdout)
-            self.assertIn("installed 0.2.0", first.stdout)
-            self.assertIn("latest v0.3.0", first.stdout)
+            self.assertIn("installed 0.3.0", first.stdout)
+            self.assertIn("latest v0.4.0", first.stdout)
             self.assertIn("No automatic update was applied", first.stdout)
 
-            latest_v040 = json.dumps(
+            latest_v050 = json.dumps(
                 {
-                    "tag_name": "v0.4.0",
-                    "html_url": "https://github.com/AAO-SH/fable-harness/releases/tag/v0.4.0",
+                    "tag_name": "v0.5.0",
+                    "html_url": "https://github.com/AAO-SH/fable-harness/releases/tag/v0.5.0",
                 }
             )
             throttled = self.run_codex_script(
@@ -405,7 +443,7 @@ release packaging, version markers, and a normal closure check.
                 "release-notice.py",
                 "check",
                 "--latest-json",
-                latest_v040,
+                latest_v050,
                 "--now",
                 "2026-06-20T01:00:00+00:00",
                 "--json",
@@ -415,14 +453,14 @@ release packaging, version markers, and a normal closure check.
             throttled_data = json.loads(throttled.stdout)
             self.assertFalse(throttled_data["checked"])
             self.assertEqual(throttled_data["reason"], "throttled")
-            self.assertEqual(throttled_data["latest_version"], "v0.3.0")
+            self.assertEqual(throttled_data["latest_version"], "v0.4.0")
 
             after_interval = self.run_codex_script(
                 root,
                 "release-notice.py",
                 "check",
                 "--latest-json",
-                latest_v040,
+                latest_v050,
                 "--now",
                 "2026-06-21T01:01:00+00:00",
                 "--json",
@@ -432,9 +470,9 @@ release packaging, version markers, and a normal closure check.
             after_data = json.loads(after_interval.stdout)
             self.assertTrue(after_data["checked"])
             self.assertTrue(after_data["update_available"])
-            self.assertEqual(after_data["latest_version"], "v0.4.0")
+            self.assertEqual(after_data["latest_version"], "v0.5.0")
             state = json.loads((root / ".codex" / "harness" / "release-notice.json").read_text(encoding="utf-8"))
-            self.assertEqual(state["latest_version"], "v0.4.0")
+            self.assertEqual(state["latest_version"], "v0.5.0")
 
     def test_generated_release_notice_is_quiet_when_latest_is_not_newer(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -444,8 +482,8 @@ release packaging, version markers, and a normal closure check.
 
             current = json.dumps(
                 {
-                    "tag_name": "v0.2.0",
-                    "html_url": "https://github.com/AAO-SH/fable-harness/releases/tag/v0.2.0",
+                    "tag_name": "v0.3.0",
+                    "html_url": "https://github.com/AAO-SH/fable-harness/releases/tag/v0.3.0",
                 }
             )
             result = self.run_codex_script(
@@ -463,7 +501,7 @@ release packaging, version markers, and a normal closure check.
             data = json.loads(result.stdout)
             self.assertTrue(data["checked"])
             self.assertFalse(data["update_available"])
-            self.assertEqual(data["latest_version"], "v0.2.0")
+            self.assertEqual(data["latest_version"], "v0.3.0")
 
     def test_generated_release_notice_accepts_latest_json_file_with_utf8_bom(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -475,8 +513,8 @@ release packaging, version markers, and a normal closure check.
                 b"\xef\xbb\xbf"
                 + json.dumps(
                     {
-                        "tag_name": "v0.3.0",
-                        "html_url": "https://github.com/AAO-SH/fable-harness/releases/tag/v0.3.0",
+                        "tag_name": "v0.4.0",
+                        "html_url": "https://github.com/AAO-SH/fable-harness/releases/tag/v0.4.0",
                     }
                 ).encode("utf-8")
             )
@@ -496,7 +534,7 @@ release packaging, version markers, and a normal closure check.
             data = json.loads(result.stdout)
             self.assertTrue(data["checked"])
             self.assertTrue(data["update_available"])
-            self.assertEqual(data["latest_version"], "v0.3.0")
+            self.assertEqual(data["latest_version"], "v0.4.0")
 
     def test_prompts_and_installs_superpowers_when_absent_and_user_accepts(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -851,6 +889,144 @@ release packaging, version markers, and a normal closure check.
             self.assertTrue(check_data["flags"]["verified"])
             self.assertTrue(check_data["flags"]["closure_passed"])
             self.assertEqual(check_data["repair_attempts"], 0)
+
+    def test_generated_loop_events_are_serialized_under_parallel_writes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            install = self.run_install(root, "--agent", "codex")
+            self.assertEqual(install.returncode, 0, install.stderr)
+
+            trace_path = root / ".codex" / "decision-traces" / "parallel-loop-task.md"
+            trace_path.write_text("# Parallel Loop Task\n", encoding="utf-8")
+            start = subprocess.run(
+                [
+                    sys.executable,
+                    str(root / ".codex" / "scripts" / "loop-start.py"),
+                    "--root",
+                    str(root),
+                    "--task",
+                    "Parallel event writes",
+                    "--trace",
+                    str(trace_path),
+                    "--json",
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(start.returncode, 0, start.stdout + start.stderr)
+            run_dir = Path(json.loads(start.stdout)["run_dir"])
+
+            scripts_path = str(root / ".codex" / "scripts")
+            sys.path.insert(0, scripts_path)
+            original_write_json = None
+            try:
+                import loop_core
+
+                original_write_json = loop_core.write_json
+
+                def slow_write_json(path, data):
+                    if Path(path).name == "state.json":
+                        time.sleep(0.01)
+                    return original_write_json(path, data)
+
+                loop_core.write_json = slow_write_json
+                with ThreadPoolExecutor(max_workers=8) as pool:
+                    futures = [
+                        pool.submit(loop_core.append_event, run_dir, "file.read", f"parallel event {idx}")
+                        for idx in range(24)
+                    ]
+                    results = [future.result(timeout=10) for future in futures]
+            finally:
+                if original_write_json is not None and "loop_core" in sys.modules:
+                    sys.modules["loop_core"].write_json = original_write_json
+                sys.path = [value for value in sys.path if value != scripts_path]
+                sys.modules.pop("loop_core", None)
+
+            events = [
+                json.loads(line)
+                for line in (run_dir / "events.jsonl").read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            self.assertEqual(len(results), 24)
+            self.assertEqual(len(events), 25)
+            self.assertEqual([event["sequence"] for event in events], list(range(1, 26)))
+            state = json.loads((run_dir / "state.json").read_text(encoding="utf-8"))
+            self.assertEqual(state["event_count"], 25)
+            self.assertEqual(state["last_event"]["sequence"], 25)
+
+    def test_loop_transition_and_event_writes_share_run_lock(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            install = self.run_install(root, "--agent", "codex")
+            self.assertEqual(install.returncode, 0, install.stderr)
+
+            trace_path = root / ".codex" / "decision-traces" / "parallel-transition-task.md"
+            trace_path.write_text("# Parallel Transition Task\n", encoding="utf-8")
+            start = subprocess.run(
+                [
+                    sys.executable,
+                    str(root / ".codex" / "scripts" / "loop-start.py"),
+                    "--root",
+                    str(root),
+                    "--task",
+                    "Parallel transition writes",
+                    "--trace",
+                    str(trace_path),
+                    "--json",
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(start.returncode, 0, start.stdout + start.stderr)
+            run_dir = Path(json.loads(start.stdout)["run_dir"])
+
+            scripts_path = str(root / ".codex" / "scripts")
+            sys.path.insert(0, scripts_path)
+            original_write_json = None
+            try:
+                import loop_core
+
+                original_write_json = loop_core.write_json
+
+                def slow_write_json(path, data):
+                    if Path(path).name == "state.json":
+                        time.sleep(0.01)
+                    return original_write_json(path, data)
+
+                loop_core.write_json = slow_write_json
+                with ThreadPoolExecutor(max_workers=6) as pool:
+                    futures = [
+                        pool.submit(loop_core.append_event, run_dir, "file.read", f"parallel read {idx}")
+                        for idx in range(10)
+                    ]
+                    futures.append(
+                        pool.submit(loop_core.transition_state, run_dir, "closed", "parallel close")
+                    )
+                    results = [future.result(timeout=10) for future in futures]
+            finally:
+                if original_write_json is not None and "loop_core" in sys.modules:
+                    sys.modules["loop_core"].write_json = original_write_json
+                sys.path = [value for value in sys.path if value != scripts_path]
+                sys.modules.pop("loop_core", None)
+
+            events = [
+                json.loads(line)
+                for line in (run_dir / "events.jsonl").read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            self.assertEqual(len(results), 11)
+            self.assertEqual(len(events), 12)
+            self.assertEqual([event["sequence"] for event in events], list(range(1, 13)))
+            self.assertEqual(
+                [event["kind"] for event in events].count("loop.transition"),
+                1,
+            )
+            state = json.loads((run_dir / "state.json").read_text(encoding="utf-8"))
+            self.assertEqual(state["status"], "closed")
+            self.assertEqual(state["event_count"], 12)
+            self.assertEqual(state["last_event"]["sequence"], 12)
 
     def test_workflow_core_normalizes_recipes_and_legacy_defaults(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -3610,6 +3786,64 @@ Preserve this existing canonical decision.
             index = json.loads(touch_index.read_text(encoding="utf-8"))
             for path in paths:
                 self.assertEqual(index["items"][path]["use_count"], 1)
+
+    def test_memory_touch_lock_retries_transient_permission_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            install = self.run_install(root, "--agent", "codex")
+            self.assertEqual(install.returncode, 0, install.stderr)
+
+            note = root / ".codex" / "notes" / "decisions" / "memory" / "permission-retry.md"
+            note.parent.mkdir(parents=True, exist_ok=True)
+            note.write_text(
+                "# Permission Retry\n\n"
+                "---\n"
+                "type: canonical-decision\n"
+                "status: active\n"
+                "scope: decisions/memory/permission-retry\n"
+                "canonical: true\n"
+                "sources:\n"
+                "supersedes:\n"
+                "last_verified: 2026-06-21\n"
+                "---\n\n"
+                "## Durable Fact Or Decision\n\n"
+                "- Retry transient lock permission errors.\n",
+                encoding="utf-8",
+            )
+
+            scripts_path = str(root / ".codex" / "scripts")
+            sys.path.insert(0, scripts_path)
+            original_open = None
+            try:
+                import memory_core
+
+                original_open = memory_core.os.open
+                attempts = {"permission_errors": 0}
+
+                def flaky_open(path, flags, mode=0o777, *args, **kwargs):
+                    if str(path).endswith("touch_index.lock") and attempts["permission_errors"] < 2:
+                        attempts["permission_errors"] += 1
+                        raise PermissionError("simulated transient lock contention")
+                    return original_open(path, flags, mode, *args, **kwargs)
+
+                memory_core.os.open = flaky_open
+                result = memory_core.record_memory_touch(
+                    root,
+                    ".codex/notes/decisions/memory/permission-retry.md",
+                    "permission retry",
+                    "auto",
+                )
+            finally:
+                if original_open is not None and "memory_core" in sys.modules:
+                    sys.modules["memory_core"].os.open = original_open
+                sys.path = [value for value in sys.path if value != scripts_path]
+                sys.modules.pop("memory_core", None)
+
+            self.assertEqual(attempts["permission_errors"], 2)
+            self.assertEqual(result["use_count"], 1)
+            touch_index = root / ".codex" / "memory" / "touch_index.json"
+            index = json.loads(touch_index.read_text(encoding="utf-8"))
+            self.assertEqual(index["items"][".codex/notes/decisions/memory/permission-retry.md"]["use_count"], 1)
 
     def test_selective_revert_git_plan_is_dry_run_and_apply_requires_explicit_flag(self):
         if not shutil.which("git"):

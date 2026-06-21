@@ -1,6 +1,6 @@
 {
   "name": "@aao-sh/fable-harness",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Project-local agent harness skill for traceable AI workflows.",
   "type": "module",
   "license": "MIT",

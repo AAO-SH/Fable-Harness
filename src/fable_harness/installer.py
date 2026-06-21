@@ -18,7 +18,7 @@ from pathlib import Path
 
 START = "<!-- fable-harness:start -->"
 END = "<!-- fable-harness:end -->"
-FABLE_HARNESS_VERSION = "0.2.0"
+FABLE_HARNESS_VERSION = "0.3.0"
 FABLE_HARNESS_RELEASES_LATEST_URL = "https://github.com/AAO-SH/fable-harness/releases/latest"
 FABLE_HARNESS_RELEASES_API_URL = "https://api.github.com/repos/AAO-SH/fable-harness/releases/latest"
 SUPERPOWERS_LATEST_URL = "https://github.com/obra/superpowers/releases/latest"
@@ -65,6 +65,16 @@ These instructions install the local Fable Harness for {agent_name}. Use it for 
 4. Read only the compact notes relevant to the task.
 5. Open decision traces only when audit or continuation requires the decision path.
 6. Read the real project files before editing them.
+
+### Project-Local Harness Scope
+
+- When the user asks to save, memorize, remember, store, register, persist, or update project context, use `{local_dir}/` first.
+- Do not satisfy those requests only through global model memory, external notes, chat summary, or user-level agent storage; those may be extra mirrors, but `{local_dir}/` is mandatory.
+- Use `{local_dir}/scripts/new-note.py`, `{local_dir}/scripts/promote-trace.py`, `{local_dir}/scripts/rebuild-memory.py`, and `{local_dir}/scripts/memory-touch.py` for local durable memory work.
+- Use `{local_dir}/decision-traces/` for audit evidence and `{local_dir}/notes/` for compact semantic memory before any model-native memory mirror.
+- When any Fable Harness feature exists locally, prefer the local `{local_dir}/scripts/` tool over an equivalent global or model-native memory action.
+- If higher-priority runtime policy also requires global/model memory, do both: first write or update the project-local harness artifact, then mirror or summarize globally with the local artifact path as the source.
+- If the local harness tool is missing or fails, record the blocker in the trace and use the nearest local artifact path manually rather than silently switching only to global memory.
 
 ### Recall Ladder
 
@@ -2492,10 +2502,18 @@ def read_json(path: Path, default: object | None = None) -> object:
 
 def write_json(path: Path, data: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(data, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.{time.monotonic_ns()}.tmp")
+    try:
+        tmp.write_text(
+            json.dumps(data, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        tmp.replace(path)
+    finally:
+        try:
+            tmp.unlink()
+        except FileNotFoundError:
+            pass
 
 
 def frontmatter_value(text: str, key: str) -> str | None:
@@ -2560,7 +2578,7 @@ class TouchIndexLock:
                 self.handle = os.open(str(self.path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
                 os.write(self.handle, str(os.getpid()).encode("utf-8"))
                 return self
-            except FileExistsError:
+            except (FileExistsError, PermissionError) as exc:
                 try:
                     age = time.time() - self.path.stat().st_mtime
                     if age > 60:
@@ -2569,7 +2587,7 @@ class TouchIndexLock:
                 except OSError:
                     pass
                 if time.monotonic() >= deadline:
-                    raise TimeoutError(f"timed out waiting for memory touch lock: {self.path}")
+                    raise TimeoutError(f"timed out waiting for memory touch lock: {self.path}") from exc
                 time.sleep(0.025)
 
     def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
@@ -7525,6 +7543,7 @@ import datetime as dt
 import json
 import os
 import re
+import time
 from pathlib import Path
 
 try:
@@ -7647,11 +7666,53 @@ def events_path(run_dir: Path) -> Path:
     return run_dir / "events.jsonl"
 
 
+class LoopRunLock:
+    def __init__(self, run_dir: Path, timeout_seconds: float = 10.0) -> None:
+        self.path = run_dir / "run.lock"
+        self.timeout_seconds = timeout_seconds
+        self.handle: int | None = None
+
+    def __enter__(self) -> "LoopRunLock":
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        deadline = time.monotonic() + self.timeout_seconds
+        while True:
+            try:
+                self.handle = os.open(str(self.path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.write(self.handle, str(os.getpid()).encode("utf-8"))
+                return self
+            except (FileExistsError, PermissionError) as exc:
+                try:
+                    age = time.time() - self.path.stat().st_mtime
+                    if age > 60:
+                        self.path.unlink()
+                        continue
+                except OSError:
+                    pass
+                if time.monotonic() >= deadline:
+                    raise TimeoutError(f"timed out waiting for loop run lock: {self.path}") from exc
+                time.sleep(0.025)
+
+    def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
+        if self.handle is not None:
+            os.close(self.handle)
+            self.handle = None
+        try:
+            self.path.unlink()
+        except FileNotFoundError:
+            pass
+
+
 def write_json(path: Path, data: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    tmp.replace(path)
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.{time.monotonic_ns()}.tmp")
+    try:
+        tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        tmp.replace(path)
+    finally:
+        try:
+            tmp.unlink()
+        except FileNotFoundError:
+            pass
 
 
 def load_state(run_dir: Path) -> dict[str, object]:
@@ -7839,6 +7900,11 @@ def unclosed_subagent_sessions(root: Path | None, state: dict[str, object]) -> l
 
 
 def sync_state(run_dir: Path) -> dict[str, object]:
+    with LoopRunLock(run_dir):
+        return sync_state_unlocked(run_dir)
+
+
+def sync_state_unlocked(run_dir: Path) -> dict[str, object]:
     state = load_state(run_dir)
     events = read_events(run_dir)
     analysis = analyze_events(events)
@@ -7851,7 +7917,7 @@ def sync_state(run_dir: Path) -> dict[str, object]:
     return state
 
 
-def append_event(
+def append_event_unlocked(
     run_dir: Path,
     kind: str,
     summary: str = "",
@@ -7890,6 +7956,33 @@ def append_event(
     state["last_event"] = event
     write_state(run_dir, state)
     return state, event
+
+
+def append_event(
+    run_dir: Path,
+    kind: str,
+    summary: str = "",
+    paths: list[str] | None = None,
+    tool: str | None = None,
+    metadata: dict[str, str] | None = None,
+) -> tuple[dict[str, object], dict[str, object]]:
+    with LoopRunLock(run_dir):
+        return append_event_unlocked(run_dir, kind, summary, paths, tool, metadata)
+
+
+def transition_state(run_dir: Path, to_state: str, reason: str = "") -> tuple[dict[str, object], dict[str, object], str]:
+    with LoopRunLock(run_dir):
+        previous_state = load_state(run_dir)
+        previous = str(previous_state.get("status"))
+        state, event = append_event_unlocked(
+            run_dir,
+            "loop.transition",
+            reason or f"{previous} -> {to_state}",
+            metadata={"from": previous, "to": to_state},
+        )
+        state["status"] = to_state
+        write_state(run_dir, state)
+        return state, event, previous
 
 
 def validate_run(
@@ -8175,7 +8268,7 @@ import json
 import sys
 from pathlib import Path
 
-from loop_core import STATES, append_event, find_local_dir, load_state, resolve_run_dir, write_state
+from loop_core import STATES, find_local_dir, resolve_run_dir, transition_state
 
 
 def main() -> int:
@@ -8192,16 +8285,7 @@ def main() -> int:
     local_dir = find_local_dir(root, args.agent)
     run_dir = resolve_run_dir(root, local_dir, args.run)
     try:
-        state = load_state(run_dir)
-        previous = str(state.get("status"))
-        state, event = append_event(
-            run_dir,
-            "loop.transition",
-            args.reason or f"{previous} -> {args.to}",
-            metadata={"from": previous, "to": args.to},
-        )
-        state["status"] = args.to
-        write_state(run_dir, state)
+        state, event, _previous = transition_state(run_dir, args.to, args.reason)
     except (OSError, ValueError) as exc:
         print(str(exc), file=sys.stderr)
         return 2
