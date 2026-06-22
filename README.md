@@ -185,50 +185,6 @@ Use it when you need to undo specific work without erasing unrelated progress.
 
 </details>
 
-## Benchmark
-
-This benchmark measures deterministic project control surfaces, not model quality. It compares an empty temporary workspace with the same workspace after installing Fable Harness.
-
-Measured on: 2026-06-22T01:26:09+00:00
-
-| Capability | Without Fable Harness | With Fable Harness |
-|---|---:|---:|
-| Capability checks passed | 0/10 | 10/10 |
-| Installed scripts | 0 | 31 |
-| Installed templates | 0 | 5 |
-| Root agent instructions | no | yes |
-| Install elapsed | n/a | 294 ms |
-
-<details>
-<summary>Benchmark details</summary>
-
-| Check | Without | With |
-|---|---:|---:|
-| Root agent instructions | no | yes |
-| Decision trace template | no | yes |
-| Closure gate | no | yes |
-| Memory search | no | yes |
-| RAG pipeline | no | yes |
-| Loop governance | no | yes |
-| Subagent planning | no | yes |
-| Selective rollback | no | yes |
-| Code graph | no | yes |
-| Memory dreaming | no | yes |
-
-</details>
-
-## Run The Benchmark
-
-```powershell
-python scripts/benchmark_readme.py --markdown
-```
-
-For machine-readable output:
-
-```powershell
-python scripts/benchmark_readme.py --json
-```
-
 ## ✨ Acknowledgements
 
 * **[Superpowers](https://github.com/obra/superpowers)**: Provides the skill framework that enables agents to run complex tasks.
