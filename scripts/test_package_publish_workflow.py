@@ -1,5 +1,7 @@
 import json
 import re
+import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -10,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class PackagePublishWorkflowTest(unittest.TestCase):
     def setUp(self):
         self.package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        self.readme = (ROOT / "README.md").read_text(encoding="utf-8")
         self.workflow = (ROOT / ".github" / "workflows" / "publish-package.yml").read_text(
             encoding="utf-8"
         )
@@ -18,6 +21,76 @@ class PackagePublishWorkflowTest(unittest.TestCase):
         self.assertEqual(self.package["name"], "@aao-sh/fable-harness")
         self.assertEqual(self.package["publishConfig"]["registry"], "https://npm.pkg.github.com")
         self.assertEqual(self.package["publishConfig"]["access"], "public")
+
+    def test_package_metadata_is_search_optimized_for_public_discovery(self):
+        description = self.package["description"]
+        self.assertGreaterEqual(len(description), 50)
+        self.assertLessEqual(len(description), 160)
+        self.assertEqual(self.package["author"], "AAO.sh")
+        for keyword in [
+            "ai-agents",
+            "agent-harness",
+            "codex",
+            "claude-code",
+            "decision-loop",
+            "agent-memory",
+            "rag",
+            "subagents",
+            "rollback",
+            "tdd",
+        ]:
+            self.assertIn(keyword, self.package["keywords"])
+        self.assertIn("assets/", self.package["files"])
+
+    def test_readme_is_public_friendly_and_uses_packaged_assets(self):
+        self.assertIn("assets/fable_harness_icon@512.gif", self.readme)
+        self.assertIn("assets/fable_harness_logo.svg", self.readme)
+        self.assertRegex(self.readme, r"<img[^>]+height=\"72\"[^>]+fable_harness_icon@512\.gif")
+        self.assertRegex(self.readme, r"<img[^>]+height=\"72\"[^>]+fable_harness_logo\.svg")
+        self.assertIn("Give AI agents a local operating system", self.readme)
+        for badge in [
+            "github/stars/AAO-SH/Fable-Harness",
+            "github/forks/AAO-SH/Fable-Harness",
+            "github/license/AAO-SH/Fable-Harness",
+            "github/last-commit/AAO-SH/Fable-Harness",
+            "npm/dm/%40aao-sh%2Ffable-harness",
+            "node/v/%40aao-sh%2Ffable-harness",
+            "pypi/dm/fable-harness",
+            "pypi/pyversions/fable-harness",
+            "publish-package.yml",
+            "coverage",
+            "https://fable.aao.sh",
+            "https://telegram.aao.sh",
+            "https://discord.aao.sh",
+        ]:
+            self.assertIn(badge, self.readme)
+        self.assertIn("<details>", self.readme)
+        self.assertIn("<summary>Manual terminal install</summary>", self.readme)
+        self.assertIn("Python 3.9 or newer", self.readme)
+        self.assertIn("python scripts/benchmark_readme.py --markdown", self.readme)
+        for image in [
+            "assets/01_memory.png",
+            "assets/02_planning.png",
+            "assets/03_decision_loop.png",
+            "assets/04_task_parallelism.png",
+            "assets/06_rollback.png",
+        ]:
+            self.assertIn(image, self.readme)
+        for heading in ["## Why Use It", "## Benefits", "## Benchmark", "## Workflows", "## Credits", "## References", "## License"]:
+            self.assertIn(heading, self.readme)
+
+    def test_benchmark_script_outputs_measured_markdown_table(self):
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "benchmark_readme.py"), "--markdown"],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("Measured on", result.stdout)
+        self.assertIn("| Capability | Without Fable Harness | With Fable Harness |", result.stdout)
+        self.assertIn("| Capability checks passed | 0/", result.stdout)
+        self.assertRegex(result.stdout, r"\| Installed scripts \| 0 \| [1-9][0-9]* \|")
 
     def test_workflow_publishes_to_github_packages_and_npmjs_separately(self):
         self.assertIn("publish-github-packages:", self.workflow)

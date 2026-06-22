@@ -5,14 +5,30 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fable-harness"
 version = "0.3.0"
-description = "Project-local agent harness skill for traceable AI workflows."
+description = "Give AI agents project-local memory, planning, verification, and rollback for traceable coding work."
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
 authors = [
   { name = "AAO-SH" }
 ]
-keywords = ["ai-agents", "codex", "claude", "agent-harness", "tdd", "workflow"]
+keywords = [
+  "ai-agents",
+  "agent-harness",
+  "codex",
+  "claude-code",
+  "ai-workflows",
+  "decision-loop",
+  "agent-memory",
+  "rag",
+  "knowledge-graph",
+  "code-graph",
+  "subagents",
+  "rollback",
+  "tdd",
+  "workflow-automation",
+  "llm-tools"
+]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -23,9 +39,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/AAO-SH/Fable-Harness"
-Repository = "https://github.com/AAO-SH/Fable-Harness"
-Issues = "https://github.com/AAO-SH/Fable-Harness/issues"
+Homepage = "https://fable.aao.sh"
+Repository = "https://github.com/aao-sh/fable-harness"
+Issues = "https://github.com/aao-sh/fable-harness/issues"
 
 [project.scripts]
 fable-harness = "fable_harness.cli:main"
