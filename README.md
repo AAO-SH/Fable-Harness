@@ -17,10 +17,10 @@
   </br>
   <a href="https://www.npmjs.com/package/@aao-sh/fable-harness"><img alt="npm downloads" src="https://img.shields.io/npm/dm/%40aao-sh%2Ffable-harness?style=for-the-badge&logo=npm" /></a>
   <a href="https://www.npmjs.com/package/@aao-sh/fable-harness"><img alt="Node version" src="https://img.shields.io/node/v/%40aao-sh%2Ffable-harness?style=for-the-badge&logo=nodedotjs" /></a>
+  <a href="https://github.com/aao-sh/fable-harness/actions/workflows/publish-package.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/aao-sh/fable-harness/publish-package.yml?branch=main&label=build&style=for-the-badge&logo=githubactions" /></a>
+  </br>
   <a href="https://pypi.org/project/fable-harness/"><img alt="PyPI downloads" src="https://img.shields.io/pypi/dm/fable-harness?style=for-the-badge&logo=pypi" /></a>
   <a href="https://pypi.org/project/fable-harness/"><img alt="Python version" src="https://img.shields.io/pypi/pyversions/fable-harness?style=for-the-badge&logo=python" /></a>
-  </br>
-  <a href="https://github.com/aao-sh/fable-harness/actions/workflows/publish-package.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/aao-sh/fable-harness/publish-package.yml?branch=main&label=build&style=for-the-badge&logo=githubactions" /></a>
   <a href="#benchmark"><img alt="Coverage" src="https://img.shields.io/badge/coverage-pending-7C3AED?style=for-the-badge" /></a>
   </br></br>
   <a href="https://fable.aao.sh"><img alt="Website" src="https://img.shields.io/badge/Website-fable.aao.sh-2F5BFF?style=for-the-badge" /></a>
