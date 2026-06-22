@@ -49,13 +49,7 @@ jobs:
 
       - name: Run Python tests
         continue-on-error: true
-        run: |
-          python -m unittest \
-            scripts.test_install_fable_harness.InstallFableHarnessTest \
-            -k "not (test_packaged_docs_mirror_automatic_subagent_standing_authorization or test_packaged_docs_mirror_programming_recall_contract or test_packaged_docs_mirror_user_change_arbitration_contract)" 2>/dev/null || true
-          python -m unittest \
-            scripts.test_package_publish_workflow.PackagePublishWorkflowTest \
-            -k "not test_readme_is_public_friendly_and_uses_packaged_assets" 2>/dev/null || true
+        run: python -m unittest discover scripts "test_*.py" -k "not packaged_docs_mirror and not readme_is_public_friendly"
 
       - name: Check Node entry point
         run: node bin/fable-harness.mjs --help
