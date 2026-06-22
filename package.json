@@ -25,7 +25,7 @@
   "packageManager": "yarn@4.9.2",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aao-sh/fable-harness.git"
+    "url": "git+https://github.com/AAO-SH/fable-harness.git"
   },
   "homepage": "https://fable.aao.sh",
   "bugs": {
