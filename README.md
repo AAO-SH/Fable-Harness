@@ -1,7 +1,8 @@
-<p style="display: flex; justify-content: center; align-items: center; gap: 10px;">
-  <img height="150" src="assets/fable_harness_icon@512.gif" alt="Fable Harness icon" />
-  <img height="72" src="assets/fable_harness_logo.svg" alt="Fable Harness logo" />
-</p>
+<div align="center">
+  <img height="150" src="assets/fable_harness_icon@512.gif" alt="Fable Harness icon" align="middle" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img height="72" src="assets/fable_harness_logo.svg" alt="Fable Harness logo" align="middle" />
+</div>
 
 <p align="center">
   <strong>Give AI agents a local operating system for memory, planning, verification, and rollback.</strong>
@@ -44,12 +45,16 @@ Install the Fable-Harness skill (https://github.com/aao-sh/fable-harness) and ru
 The agent should handle the local project setup, choose the right surface, and run the installer with the workspace context already loaded.
 
 <details>
-<summary><span style="font-size: 1.25em; font-weight: bold;">manually</span></summary>
+<summary><h3>manually</h3></summary>
 
-<aside style="color: #d9383a; font-weight: bold; border-left: 4px solid #d9383a; padding-left: 10px;">
-  ⚠️ Fable Harness requires Python 3.9 or newer. The npm entry point can launch the installer, but the installer still runs Python under the hood.
-</aside>
-</br>
+<table bgcolor="#fff5f5" width="100%">
+  <tr>
+    <td padding="10">
+      ⚠️ <strong><font color="#d9383a">Fable Harness requires Python 3.9 or newer.</font></strong><br>
+      <font color="#555555">The npm entry point can launch the installer, but the installer still runs Python under the hood.</font>
+    </td>
+  </tr>
+</table>
 
 Check Python version:
 
@@ -59,7 +64,7 @@ python --version
 
 <details>
 <summary>Install Python if needed</summary>
-
+</br>
   <details>
     <summary> for Windows</summary>
 
@@ -94,9 +99,13 @@ npx @aao-sh/fable-harness "./path/to/project" --agent auto
 
 Or install into a workspace from this repository:
 
-<aside style="color: #0284c7; border-left: 4px solid #0284c7; padding-left: 10px;">
-  ℹ️ Use `--without-superpowers` to skip installing the Superpowers skill (not recommended).
-</aside>
+<table bgcolor="#f0f9ff" width="100%">
+  <tr>
+    <td padding="10">
+      ℹ️ <strong><font color="#0284c7">Use `--without-superpowers` to skip installing the Superpowers skill (not recommended).</font></strong>
+    </td>
+  </tr>
+</table>
 
 ```bash
 python "./scripts/install_fable_harness.py" "./path/to/project" --agent auto --with-superpowers
@@ -209,10 +218,10 @@ Use it when you need to undo specific work without erasing unrelated progress.
   * *Neural Composer: Local Graph RAG made easy (LightRAG integration)*. Discussion and implementation framework available on the [Obsidian Forum](https://forum.obsidian.md/t/neural-composer-local-graph-rag-made-easy-lightrag-integration/109891).
 
 </br></br>
-<p style="display: flex; align-items: center; gap: 10px;">
-  <img height="58" src="assets/aao_icon_white.svg" alt="AAO.sh icon" />
+<div>
+  <a href="https://aao.sh"><img height="58" src="assets/aao_icon_white.svg" alt="AAO.sh icon" align="left" style="margin-right: 14px;" /></a>
   <span>
-    Developed and maintained by the <a href="https://github.com/aao-sh/fable-harness/graphs/contributors">AAO.sh Community</a>.</br>
+    Developed and maintained by the <a href="https://github.com/aao-sh/fable-harness/graphs/contributors">AAO.sh Community</a>.<br>
     Released under the <a href="LICENSE">MIT License</a>.
   </span>
-</p>
+</div>
