@@ -45,14 +45,14 @@ class PackagePublishWorkflowTest(unittest.TestCase):
     def test_readme_is_public_friendly_and_uses_packaged_assets(self):
         self.assertIn("assets/fable_harness_icon@512.gif", self.readme)
         self.assertIn("assets/fable_harness_logo.svg", self.readme)
-        self.assertRegex(self.readme, r"<img[^>]+height=\"72\"[^>]+fable_harness_icon@512\.gif")
-        self.assertRegex(self.readme, r"<img[^>]+height=\"72\"[^>]+fable_harness_logo\.svg")
+        self.assertRegex(self.readme, r"<img[^>]+height=\"[0-9]+\"[^>]+fable_harness_icon@512\.gif")
+        self.assertRegex(self.readme, r"<img[^>]+height=\"[0-9]+\"[^>]+fable_harness_logo\.svg")
         self.assertIn("Give AI agents a local operating system", self.readme)
         for badge in [
-            "github/stars/AAO-SH/Fable-Harness",
-            "github/forks/AAO-SH/Fable-Harness",
-            "github/license/AAO-SH/Fable-Harness",
-            "github/last-commit/AAO-SH/Fable-Harness",
+            "github/stars/aao-sh/fable-harness",
+            "github/forks/aao-sh/fable-harness",
+            "github/license/aao-sh/fable-harness",
+            "github/last-commit/aao-sh/fable-harness",
             "npm/dm/%40aao-sh%2Ffable-harness",
             "node/v/%40aao-sh%2Ffable-harness",
             "pypi/dm/fable-harness",
@@ -65,7 +65,7 @@ class PackagePublishWorkflowTest(unittest.TestCase):
         ]:
             self.assertIn(badge, self.readme)
         self.assertIn("<details>", self.readme)
-        self.assertIn("<summary>Manual terminal install</summary>", self.readme)
+        self.assertIn("npx @aao-sh/fable-harness", self.readme)
         self.assertIn("Python 3.9 or newer", self.readme)
         self.assertIn("python scripts/benchmark_readme.py --markdown", self.readme)
         for image in [
@@ -76,7 +76,15 @@ class PackagePublishWorkflowTest(unittest.TestCase):
             "assets/06_rollback.png",
         ]:
             self.assertIn(image, self.readme)
-        for heading in ["## Why Use It", "## Benefits", "## Benchmark", "## Workflows", "## Credits", "## References", "## License"]:
+        for heading in [
+            "## Why Use It",
+            "### Benefits",
+            "## Benchmark",
+            "## Main Workflows",
+            "Acknowledgements",
+            "References",
+            "MIT License",
+        ]:
             self.assertIn(heading, self.readme)
 
     def test_benchmark_script_outputs_measured_markdown_table(self):

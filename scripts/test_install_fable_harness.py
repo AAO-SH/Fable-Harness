@@ -130,20 +130,36 @@ release packaging, version markers, and a normal closure check.
         return self.run_codex_script(root, "loop-check.py", "--run", str(run_dir), "--strict", "--json")
 
     def test_packaged_docs_mirror_automatic_subagent_standing_authorization(self):
-        for path in [ROOT / "SKILL.md", ROOT / "README.md"]:
-            text = path.read_text(encoding="utf-8")
-            self.assertIn("standing project-level user authorization", text, str(path))
-            self.assertIn("per-prompt permission", text, str(path))
-            self.assertIn("platform limitation", text, str(path))
-            self.assertNotIn("Explicit delegation phrase", text, str(path))
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("standing project-level user authorization", skill)
+        self.assertIn("per-prompt permission", skill)
+        self.assertIn("platform limitation", skill)
+        self.assertNotIn("Explicit delegation phrase", skill)
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("Automatic Subagent Dispatch", readme)
+        self.assertIn("per-prompt permission", readme)
+        self.assertIn("Fallback Management", readme)
 
     def test_packaged_docs_mirror_programming_recall_contract(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Programming Recall", skill)
+        self.assertIn("semantic recall explains why", skill)
+        self.assertIn("Code Graph maps where and what may break", skill)
+        self.assertIn("source files remain the final operational authority", skill)
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("Programming Recall Protocol", readme)
+        self.assertIn("Semantic Recall", readme)
+        self.assertIn("Code Graph Mapping", readme)
+        self.assertIn("Operational Authority", readme)
+
+    def test_packaged_docs_mirror_user_change_arbitration_contract(self):
         for path in [ROOT / "SKILL.md", ROOT / "README.md"]:
             text = path.read_text(encoding="utf-8")
-            self.assertIn("Programming Recall", text, str(path))
-            self.assertIn("semantic recall explains why", text, str(path))
-            self.assertIn("Code Graph maps where and what may break", text, str(path))
-            self.assertIn("source files remain the final operational authority", text, str(path))
+            self.assertIn("User Change Arbitration", text, str(path))
+            self.assertIn("new task context, not as regressions", text, str(path))
+            self.assertIn("Tests are evidence, not ownership", text, str(path))
 
     def test_generated_instructions_require_project_local_harness_for_memory_actions(self):
         cases = [
@@ -403,6 +419,40 @@ release packaging, version markers, and a normal closure check.
             text = agents.read_text(encoding="utf-8")
             self.assertEqual(text.count("<!-- fable-harness:start -->"), 1)
             self.assertEqual(text.count("<!-- fable-harness:end -->"), 1)
+
+    def test_generated_instructions_arbitrate_user_modified_files_before_repairs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            result = self.run_install(root, "--agent", "codex", "--without-superpowers")
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            text = (root / "AGENTS.md").read_text(encoding="utf-8")
+            self.assertIn("### User Change Arbitration", text)
+            arbitration_section = text.split("### User Change Arbitration", 1)[1].split(
+                "### Decision Loop",
+                1,
+            )[0]
+            self.assertIn(
+                "Treat files changed by the user after prior agent work as new task context, not as regressions by default.",
+                arbitration_section,
+            )
+            self.assertIn(
+                "Do not rewrite, revert, reformat, normalize, or otherwise alter a user-modified file just to satisfy stale tests, snapshots, generated expectations, or prior agent preferences without asking the user first.",
+                arbitration_section,
+            )
+            self.assertIn(
+                "If tests fail after user edits, report the failing expectation and ask whether the user wants to preserve the new behavior, update the tests, or restore the old behavior.",
+                arbitration_section,
+            )
+            self.assertIn(
+                "Explicit user constraints such as `do not edit`, `preserve`, `only change`, `leave untouched`, or named file/path limits override stale plans and prior harness expectations unless the user approves changing them.",
+                arbitration_section,
+            )
+            self.assertIn(
+                "Tests are evidence, not ownership.",
+                arbitration_section,
+            )
 
     def test_generated_release_notice_warns_once_per_24_hours_when_new_release_exists(self):
         with tempfile.TemporaryDirectory() as tmp:

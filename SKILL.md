@@ -121,6 +121,7 @@ The installer preserves existing root instructions and updates only the marked `
 - Use Programming Recall for non-trivial programming work: semantic recall explains why, Code Graph maps where and what may break, and source files remain the final operational authority.
 - Combine semantic memory and Code Graph before broad source-code edits: use memory/RAG/semantic graph for prior decisions, architecture intent, constraints, and verification history; use Code Graph for files, symbols, dependencies, callers, tests, and static impact.
 - Treat Code Graph output as orientation evidence only. Read the real source files before editing and let source files win when graph output disagrees.
+- Use User Change Arbitration when files differ after prior agent work. Treat files changed by the user as new task context, not as regressions by default. Tests are evidence, not ownership: if stale tests, snapshots, generated expectations, or previous agent preferences conflict with user edits, report the conflict and ask whether to preserve the new behavior, update tests, or restore the old behavior before changing user-modified files.
 - Use the loop: Orient, Inspect, Decide, Act, Verify, Report.
 - Treat Six Workflow Patterns as composable workflow recipes above the loop: `classify-and-act`, `fan-out-and-synthesize`, `adversarial-verification`, `generate-and-filter`, `tournament`, and `loop-until-done`.
 - Use `loop-start.py --pattern` and repeated `--recipe` flags to record workflow-aware runs; pattern-specific strict checks apply only to workflow-aware runs, while legacy loops remain compatible.
@@ -365,5 +366,6 @@ python ".codex\scripts\rebuild-memory.py" --root "."
 | Creating duplicate active notes for the same decision | Keep one active `canonical-decision` per `scope`; mark older notes `superseded` or convert them to `trace-summary`. |
 | Treating trace summaries as canonical memory | Link them from the canonical note or mark them non-canonical. |
 | Reverting with `git reset --hard` or broad checkout | Use `selective-revert.py` to plan file/hunk-level rollback with backups and explicit `--apply`. |
+| Treating user edits as regressions because older tests or snapshots fail | Use User Change Arbitration: explain the conflict and ask whether to preserve the new behavior, update tests, or restore the old behavior. |
 | Editing protected TDD tests to pass | Stop and explain; only replace a wrong test with an equally strict corrected test. |
 | Reporting done without closure | Run the closure checklist or state the blocker. |

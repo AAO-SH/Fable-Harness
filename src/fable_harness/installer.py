@@ -114,6 +114,15 @@ Use this order for non-trivial recall, from fastest and most compact memory towa
 - Treat Code Graph output as orientation evidence only. If Code Graph output conflicts with source files, source files win.
 - After source edits that change public symbols, rebuild the code graph with `{local_dir}/scripts/code-graph-build.py` or state why it was not needed.
 
+### User Change Arbitration
+
+- Treat files changed by the user after prior agent work as new task context, not as regressions by default.
+- Before repairing, reverting, reformatting, normalizing, or rewriting a file that differs from prior agent expectations, inspect the current diff and decide whether the difference may be user-authored.
+- Do not rewrite, revert, reformat, normalize, or otherwise alter a user-modified file just to satisfy stale tests, snapshots, generated expectations, or prior agent preferences without asking the user first.
+- If tests fail after user edits, report the failing expectation and ask whether the user wants to preserve the new behavior, update the tests, or restore the old behavior.
+- Explicit user constraints such as `do not edit`, `preserve`, `only change`, `leave untouched`, or named file/path limits override stale plans and prior harness expectations unless the user approves changing them.
+- Tests are evidence, not ownership. Protected TDD tests still must not be weakened silently; when protected tests conflict with user changes, pause and ask which contract should now govern.
+
 ### Decision Loop
 
 1. Orient: restate the task operationally and identify the smallest relevant surface.

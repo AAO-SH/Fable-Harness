@@ -128,24 +128,6 @@ AI agents are strongest when their work is grounded in files, evidence, and repe
 - Protected TDD evidence and closure checks.
 - Selective rollback plans instead of broad destructive resets.
 
-</br>
-<details>
-<summary><span style="font-size: 1.25em; font-weight: bold;">📜 Agent Discipline Contract</span></summary>
-
-To ensure predictable behavior and efficient execution, the agent strictly follows these core constraints:
-
-#### ⚙️ Automation & Delegation
-* **Automatic Subagent Dispatch:** Pre-authorized at the project level. The agent will not ask for per-prompt permission when tasks can run safely in independent domains.
-* **Fallback Management:** If platform restrictions block delegation, the agent automatically records the fallback state and proceeds using the safest available workflow.
-
-#### 🧠 Programming Recall Protocol
-Before making broad edits to source files, the agent cross-references three critical layers of context:
-1. **Semantic Recall:** Identifies *why* prior structural decisions were made.
-2. **Code Graph Mapping:** Determines *where* changes will impact and *what* might break.
-3. **Operational Authority:** Treats the local source files as the final, absolute truth.
-
-</details>
-
 ## Main Workflows
 
 <details>
