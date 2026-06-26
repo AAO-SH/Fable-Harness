@@ -1,0 +1,21 @@
+{
+  "name": "Fable Harness",
+  "short_name": "Fable",
+  "description": "Project-local operating layer for AI agents.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f1df",
+  "theme_color": "#2f261d",
+  "icons": [
+    {
+      "src": "/assets/brand/fable-harness-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/brand/fable-harness-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

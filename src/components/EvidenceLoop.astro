@@ -1,0 +1,13 @@
+---
+import { site } from "@/data/site";
+---
+
+<ol class="evidence-loop">
+  {site.evidence.phases.map((phase, index) => (
+    <li>
+      <span>{String(index + 1).padStart(2, "0")}</span>
+      <h3>{phase.title}</h3>
+      <p>{phase.detail}</p>
+    </li>
+  ))}
+</ol>

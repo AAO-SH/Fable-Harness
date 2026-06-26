@@ -1,0 +1,23 @@
+---
+import type { Workflow } from "@/data/site";
+
+interface Props {
+  workflow: Workflow;
+  index: number;
+}
+
+const { workflow, index } = Astro.props;
+---
+
+<article class="workflow-plate">
+  <div class="workflow-image-frame">
+    <img src={workflow.image} alt={`${workflow.title} workflow diagram`} loading="lazy" decoding="async" />
+  </div>
+  <div class="workflow-body">
+    <p class="plate-number">Plate {String(index + 1).padStart(2, "0")}</p>
+    <h3>{workflow.title}</h3>
+    <p class="mechanism">{workflow.mechanism}</p>
+    <p>{workflow.description}</p>
+    <p class="best-for">{workflow.bestFor}</p>
+  </div>
+</article>

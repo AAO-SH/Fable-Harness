@@ -1,0 +1,50 @@
+<script is:inline>
+  const nav = document.querySelector("[data-primary-nav]");
+  const navToggle = document.querySelector("[data-nav-toggle]");
+
+  navToggle?.addEventListener("click", () => {
+    const isOpen = nav?.getAttribute("data-open") === "true";
+    nav?.setAttribute("data-open", String(!isOpen));
+    navToggle.setAttribute("aria-expanded", String(!isOpen));
+    navToggle.setAttribute("aria-label", isOpen ? "Open navigation" : "Close navigation");
+  });
+
+  document.querySelectorAll("[data-copy-target]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const targetId = button.getAttribute("data-copy-target");
+      const target = targetId ? document.getElementById(targetId) : null;
+      const value = target?.textContent?.trim();
+
+      if (!value) {
+        return;
+      }
+
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(value);
+        } else {
+          throw new Error("Clipboard API unavailable");
+        }
+      } catch {
+        const fallback = document.createElement("textarea");
+        fallback.value = value;
+        fallback.setAttribute("readonly", "");
+        fallback.style.position = "fixed";
+        fallback.style.top = "-9999px";
+        document.body.appendChild(fallback);
+        fallback.select();
+        document.execCommand("copy");
+        fallback.remove();
+      }
+      const originalLabel = button.getAttribute("aria-label") || "Copy command";
+      const copiedLabel = originalLabel.replace(/^Copy/, "Copied");
+      button.textContent = "Copied";
+      button.setAttribute("aria-label", copiedLabel);
+
+      window.setTimeout(() => {
+        button.textContent = "Copy";
+        button.setAttribute("aria-label", originalLabel);
+      }, 1800);
+    });
+  });
+</script>

@@ -1,0 +1,46 @@
+---
+import { site } from "@/data/site";
+---
+
+<section class="hero section-shell" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <p class="eyebrow">{site.hero.eyebrow}</p>
+    <h1 id="hero-title">{site.hero.title}</h1>
+    <p class="hero-lede">{site.hero.description}</p>
+    <div class="hero-actions">
+      <a class="button button-primary" href={`#${site.sections.install.id}`}>{site.hero.primaryCta}</a>
+      <a class="button button-secondary" href={site.meta.repoUrl}>{site.hero.secondaryCta}</a>
+    </div>
+    <div class="command-card hero-command">
+      <div class="command-card-header">
+        <span>prompt</span>
+        <button type="button" data-copy-target="hero-prompt-command" aria-label="Copy hero prompt install command">
+          Copy
+        </button>
+      </div>
+      <pre><code id="hero-prompt-command">{site.hero.promptCommand}</code></pre>
+    </div>
+    <dl class="hero-metrics">
+      {site.hero.metrics.map((metric) => (
+        <div>
+          <dt>{metric.value}</dt>
+          <dd>{metric.label}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+  <figure class="hero-art">
+    <picture>
+      <source srcset="/assets/art/trace-engine-hero.webp" type="image/webp" />
+      <img
+        src="/assets/art/trace-engine-hero.png"
+        alt="A brass trace engine on an ivory drafting table with gauges, archive cylinders, and blueprint lines."
+        width="1800"
+        height="960"
+        loading="eager"
+        decoding="async"
+      />
+    </picture>
+    <figcaption>The Trace Engine: project memory, planning, verification, and rollback as one calibrated system.</figcaption>
+  </figure>
+</section>

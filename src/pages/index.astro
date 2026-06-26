@@ -1,0 +1,127 @@
+---
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/cinzel/600.css";
+import "@fontsource/cinzel/700.css";
+import "@fontsource/jetbrains-mono/500.css";
+import "@/styles/global.css";
+
+import EvidenceLoop from "@/components/EvidenceLoop.astro";
+import Faq from "@/components/Faq.astro";
+import Footer from "@/components/Footer.astro";
+import Hero from "@/components/Hero.astro";
+import InstallPanel from "@/components/InstallPanel.astro";
+import Nav from "@/components/Nav.astro";
+import SiteScript from "@/components/SiteScript.astro";
+import WorkflowPlate from "@/components/WorkflowPlate.astro";
+import { site } from "@/data/site";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{site.meta.title}</title>
+    <meta name="description" content={site.meta.description} />
+    <link rel="canonical" href={site.meta.url} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={site.meta.title} />
+    <meta property="og:description" content={site.meta.description} />
+    <meta property="og:url" content={site.meta.url} />
+    <meta property="og:image" content={`${site.meta.url}${site.meta.image}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#2f261d" />
+    <link rel="icon" type="image/png" href="/assets/brand/fable-harness-icon-192.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+  </head>
+  <body>
+    <Nav />
+    <main>
+      <Hero />
+
+      <section id={site.sections.why.id} class="section-shell problem-section" aria-labelledby="why-title">
+        <div class="section-heading">
+          <p class="eyebrow">{site.why.kicker}</p>
+          <h2 id="why-title">{site.why.title}</h2>
+          <p>{site.why.intro}</p>
+        </div>
+        <div class="problem-grid">
+          <div class="problem-list">
+            {site.why.problems.map((problem) => (
+              <p>{problem}</p>
+            ))}
+          </div>
+          <aside class="solution-panel">
+            <span>Fable's answer</span>
+            <p>{site.why.solution}</p>
+          </aside>
+        </div>
+      </section>
+
+      <section id={site.sections.install.id} class="section-shell install-section" aria-labelledby="install-title">
+        <div class="section-heading narrow">
+          <p class="eyebrow">{site.install.kicker}</p>
+          <h2 id="install-title">{site.install.title}</h2>
+        </div>
+        <InstallPanel />
+      </section>
+
+      <section id={site.sections.workflows.id} class="section-shell workflows-section" aria-labelledby="workflows-title">
+        <div class="section-heading">
+          <p class="eyebrow">Main workflows</p>
+          <h2 id="workflows-title">Five calibrated mechanisms for agent work.</h2>
+          <p>
+            Each workflow turns an otherwise fuzzy agent behavior into a visible, reviewable project operation.
+          </p>
+        </div>
+        <div class="workflow-grid">
+          {site.workflows.map((workflow, index) => (
+            <WorkflowPlate workflow={workflow} index={index} />
+          ))}
+        </div>
+      </section>
+
+      <section id={site.sections.evidence.id} class="section-shell evidence-section" aria-labelledby="evidence-title">
+        <div class="section-heading narrow">
+          <p class="eyebrow">{site.evidence.kicker}</p>
+          <h2 id="evidence-title">{site.evidence.title}</h2>
+        </div>
+        <EvidenceLoop />
+      </section>
+
+      <section id={site.sections.community.id} class="section-shell community-section" aria-labelledby="community-title">
+        <div class="community-card">
+          <div>
+            <p class="eyebrow">{site.community.kicker}</p>
+            <h2 id="community-title">{site.community.title}</h2>
+          </div>
+          <div class="community-links">
+            {site.community.links.map((link) => (
+              <a href={link.href}>{link.label}</a>
+            ))}
+          </div>
+        </div>
+        <div class="plugin-panel">
+          {site.plugins.map((plugin) => (
+            <article>
+              <h3>{plugin.name}</h3>
+              <p>{plugin.value}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id={site.sections.faq.id} class="section-shell faq-section" aria-labelledby="faq-title">
+        <div class="section-heading narrow">
+          <p class="eyebrow">FAQ</p>
+          <h2 id="faq-title">Adoption questions, answered compactly.</h2>
+        </div>
+        <Faq />
+      </section>
+    </main>
+    <Footer />
+    <SiteScript />
+  </body>
+</html>

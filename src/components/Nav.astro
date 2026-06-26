@@ -1,0 +1,18 @@
+---
+import { site } from "@/data/site";
+---
+
+<header class="site-header">
+  <a class="brand" href="/" aria-label="Fable Harness home">
+    <img src="/assets/brand/fable-harness-logo.svg" alt="" width="170" height="36" />
+  </a>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false" data-nav-toggle>
+    Menu
+  </button>
+  <nav class="primary-nav" aria-label="Primary" data-open="false" data-primary-nav>
+    {Object.values(site.sections).map((item) => (
+      <a href={`#${item.id}`}>{item.label}</a>
+    ))}
+    <a class="nav-repo" href={site.meta.repoUrl}>GitHub</a>
+  </nav>
+</header>
