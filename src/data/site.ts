@@ -4,7 +4,7 @@ export const site = {
     description:
       "Fable Harness gives AI coding agents project-local memory, planning, verification, decision loops, parallel work discipline, and selective rollback.",
     url: "https://fable.aao.sh",
-    image: "/assets/art/og-image.png",
+    image: "/assets/art/community-agent-assembly.webp",
     repoUrl: "https://github.com/aao-sh/fable-harness",
     licenseUrl: "https://github.com/aao-sh/fable-harness/blob/main/LICENSE",
   },

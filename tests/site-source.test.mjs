@@ -26,6 +26,8 @@ test("site data defines the institutional landing page contract", async () => {
   assert.match(source, /href: "https:\/\/aao\.sh"/);
   assert.match(source, /repoUrl: "https:\/\/github\.com\/aao-sh\/fable-harness"/);
   assert.match(source, /licenseUrl: "https:\/\/github\.com\/aao-sh\/fable-harness\/blob\/main\/LICENSE"/);
+  assert.match(source, /image: "\/assets\/art\/community-agent-assembly\.webp"/);
+  assert.doesNotMatch(source, /image: "\/assets\/art\/og-image\.png"/);
   assert.doesNotMatch(source, /github\.com\/AAO-SH/);
   assert.doesNotMatch(source, /image: "\/assets\/workflows\//);
   assert.match(source, /label: "GitHub", href: "https:\/\/github\.com\/aao-sh", icon: "github"/);
