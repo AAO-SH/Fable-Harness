@@ -79,10 +79,15 @@ test("page uses a shared section heading component for repeated headings", async
 
 test("pages workflow rebuilds when release data changes", async () => {
   const workflow = await readFile(new URL("../.github/workflows/pages.yml", import.meta.url), "utf8");
+  const nojekyll = await readFile(new URL("../public/.nojekyll", import.meta.url), "utf8");
 
   assert.match(workflow, /release:\s*\n\s*types:\s*\[published, edited, deleted\]/);
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /npm run build/);
+  assert.match(workflow, /actions\/upload-pages-artifact@v\d+/);
+  assert.match(workflow, /actions\/deploy-pages@v\d+/);
+  assert.doesNotMatch(workflow, /jekyll-build-pages/);
+  assert.match(nojekyll, /Disable Jekyll/);
 });
 
 test("global background uses a mechanical workshop atmosphere behind the blueprint grid", async () => {
