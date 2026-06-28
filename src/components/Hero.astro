@@ -1,5 +1,7 @@
 ---
+import { Image } from "astro:assets";
 import { site } from "@/data/site";
+import traceEnginePaintedBase from "@/assets/art/trace-engine-painted-base.webp";
 ---
 
 <section class="hero section-shell" aria-labelledby="hero-title">
@@ -7,19 +9,18 @@ import { site } from "@/data/site";
     <p class="eyebrow">{site.hero.eyebrow}</p>
     <h1 id="hero-title">{site.hero.title}</h1>
     <p class="hero-lede">{site.hero.description}</p>
-    <div class="hero-actions">
-      <a class="button button-primary" href={`#${site.sections.install.id}`}>{site.hero.primaryCta}</a>
-      <a class="button button-secondary" href={site.meta.repoUrl}>{site.hero.secondaryCta}</a>
-    </div>
-    <div class="command-card hero-command">
+    <div id={site.sections.install.id} class="command-card hero-command">
       <div class="command-card-header">
-        <span>prompt</span>
-        <button type="button" data-copy-target="hero-prompt-command" aria-label="Copy hero prompt install command">
+        <button class="command-mode-button is-active" type="button" aria-pressed="true">
+          {site.hero.primaryCta}
+        </button>
+        <button type="button" data-copy-target="hero-command-value" aria-label="Copy install command">
           Copy
         </button>
       </div>
-      <pre><code id="hero-prompt-command">{site.hero.promptCommand}</code></pre>
+      <pre><code id="hero-command-value">{site.hero.promptCommand}</code></pre>
     </div>
+    <p class="hero-command-note">{site.install.manualNote}</p>
     <dl class="hero-metrics">
       {site.hero.metrics.map((metric) => (
         <div>
@@ -29,18 +30,81 @@ import { site } from "@/data/site";
       ))}
     </dl>
   </div>
-  <figure class="hero-art">
-    <picture>
-      <source srcset="/assets/art/trace-engine-hero.webp" type="image/webp" />
-      <img
-        src="/assets/art/trace-engine-hero.png"
-        alt="A brass trace engine on an ivory drafting table with gauges, archive cylinders, and blueprint lines."
-        width="1800"
-        height="960"
-        loading="eager"
+  <figure class="hero-art trace-engine-animation">
+    <div class="engine-scene trace-rig" aria-hidden="true" data-trace-engine-scene data-render-state="fallback">
+      <canvas class="trace-engine-canvas" data-trace-engine-canvas></canvas>
+      <Image
+        class="engine-backdrop trace-rig-backdrop"
+        src={traceEnginePaintedBase}
+        data-trace-engine-fallback
+        data-responsive-loading
+        alt=""
+        loading="lazy"
         decoding="async"
       />
-    </picture>
-    <figcaption>The Trace Engine: project memory, planning, verification, and rollback as one calibrated system.</figcaption>
+      <div class="rig-depth-vignette"></div>
+      <div class="rig-window-light"></div>
+      <div class="rig-table-shadow"></div>
+      <div class="trace-stage rig-stage">
+        <div class="rig-paper-plane">
+          <div class="rig-prompt-slip">
+            <span>Prompt</span>
+            <strong># Make a 2D platformer game...</strong>
+          </div>
+          <span class="rig-document-slip rig-document-memory">agents.md</span>
+          <span class="rig-document-slip rig-document-notes">notes.md</span>
+          <span class="rig-document-slip rig-document-trace">trace.md</span>
+        </div>
+        <div class="rig-cabinet-target">
+          <span class="rig-cabinet-label">Archive cabinet</span>
+          <span class="rig-drawer-light rig-drawer-memory"></span>
+          <span class="rig-drawer-light rig-drawer-plans"></span>
+          <span class="rig-drawer-light rig-drawer-decisions"></span>
+        </div>
+        <div class="rig-rollback-dial">
+          <span class="rig-dial-face"></span>
+          <span class="rig-dial-hand rig-dial-hour"></span>
+          <span class="rig-dial-hand rig-dial-minute"></span>
+        </div>
+        <div class="rig-flow-thread rig-flow-prompt"></div>
+        <div class="rig-flow-thread rig-flow-memory"></div>
+        <div class="rig-flow-thread rig-flow-trace"></div>
+      </div>
+    </div>
+    <figcaption class="sr-only">
+      The Trace Engine: project memory, planning, verification, and rollback as one calibrated system.
+    </figcaption>
   </figure>
 </section>
+
+<script>
+  const canLoadTraceEngineScene = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return false;
+    }
+
+    if (!window.matchMedia("(min-width: 1000px)").matches) {
+      return false;
+    }
+
+    try {
+      return window.localStorage?.getItem("fable-disable-webgl") !== "1";
+    } catch {
+      return true;
+    }
+  };
+
+  const loadTraceEngineScene = () => {
+    if (!canLoadTraceEngineScene()) {
+      return;
+    }
+
+    import("@/scripts/trace-engine-scene");
+  };
+
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(loadTraceEngineScene, { timeout: 1200 });
+  } else {
+    window.setTimeout(loadTraceEngineScene, 160);
+  }
+</script>

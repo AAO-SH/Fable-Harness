@@ -11,7 +11,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "npm run preview -- --host 127.0.0.1 --port 4321",
+    command: "node tests/static-server.mjs dist 4321",
     url: "http://127.0.0.1:4321",
     reuseExistingServer: !process.env.CI,
   },
@@ -19,6 +19,10 @@ export default defineConfig({
     {
       name: "desktop",
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 1200 } },
+    },
+    {
+      name: "tablet",
+      use: { ...devices["Desktop Chrome"], viewport: { width: 768, height: 1200 } },
     },
     {
       name: "mobile",

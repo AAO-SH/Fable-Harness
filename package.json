@@ -9,8 +9,8 @@
     "preview": "astro preview",
     "test": "node --test tests/*.test.mjs",
     "validate:html": "html-validate \"dist/**/*.html\"",
-    "test:a11y": "playwright test tests/a11y.spec.mjs",
-    "test:visual": "playwright test tests/visual.spec.mjs",
+    "test:a11y": "playwright test tests/a11y.spec.mjs --output=test-results/a11y",
+    "test:visual": "playwright test tests/visual.spec.mjs --output=test-results/visual",
     "check:links": "node tests/check-links.mjs"
   },
   "dependencies": {
@@ -19,6 +19,7 @@
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "astro": "^7.0.3",
+    "three": "^0.185.0",
     "typescript": "^6.0.3"
   },
   "devDependencies": {

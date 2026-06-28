@@ -3,6 +3,8 @@ name: Deploy Fable Harness site to Pages
 on:
   push:
     branches: [webpage]
+  release:
+    types: [published, edited, deleted]
   workflow_dispatch:
 
 permissions:

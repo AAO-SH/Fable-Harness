@@ -1,4 +1,67 @@
 <script is:inline>
+  const themeToggle = document.querySelector("[data-theme-toggle]");
+  const aaoIcon = document.querySelector("[data-aao-icon]");
+  const responsiveLoadingImages = [...document.querySelectorAll("[data-responsive-loading]")];
+
+  const getElementDocumentTop = (element) => {
+    let currentElement = element;
+    let elementYPosition = 0;
+
+    while (currentElement) {
+      elementYPosition += currentElement.offsetTop || 0;
+      currentElement = currentElement.offsetParent;
+    }
+
+    return elementYPosition;
+  };
+
+  const updateResponsiveImageLoading = () => {
+    responsiveLoadingImages.forEach((image) => {
+      const isAboveFold = getElementDocumentTop(image) < window.innerHeight;
+      image.setAttribute("loading", isAboveFold ? "eager" : "lazy");
+      image.setAttribute("fetchpriority", isAboveFold ? "high" : "auto");
+    });
+  };
+
+  const setAaoIcon = (theme) => {
+    if (!aaoIcon) {
+      return;
+    }
+
+    const fallback = aaoIcon.getAttribute("data-aao-icon-dark") || aaoIcon.getAttribute("src") || "";
+    const nextSrc =
+      theme === "light" ? aaoIcon.getAttribute("data-aao-icon-light") : aaoIcon.getAttribute("data-aao-icon-dark");
+
+    aaoIcon.setAttribute("src", nextSrc || fallback);
+  };
+
+  const setTheme = (theme) => {
+    const normalizedTheme = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", normalizedTheme);
+    setAaoIcon(normalizedTheme);
+    themeToggle?.setAttribute("aria-pressed", String(normalizedTheme === "light"));
+    themeToggle?.setAttribute(
+      "aria-label",
+      normalizedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+    );
+  };
+
+  try {
+    setTheme(window.localStorage?.getItem("fable-theme") || "dark");
+  } catch {
+    setTheme("dark");
+  }
+
+  themeToggle?.addEventListener("click", () => {
+    const nextTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    try {
+      window.localStorage?.setItem("fable-theme", nextTheme);
+    } catch {
+      /* Theme persistence is optional. */
+    }
+  });
+
   const nav = document.querySelector("[data-primary-nav]");
   const navToggle = document.querySelector("[data-nav-toggle]");
 
@@ -47,4 +110,203 @@
       }, 1800);
     });
   });
+
+  const workflowModal = document.querySelector("[data-workflow-modal]");
+  const workflowModalImage = document.querySelector("[data-workflow-modal-image]");
+  const workflowModalTitle = document.querySelector("[data-workflow-modal-title]");
+  const workflowModalClose = document.querySelector("[data-workflow-modal-close]");
+  const workflowCarousel = document.querySelector("[data-workflow-carousel]");
+  let workflowModalReturnTarget = null;
+
+  const closeWorkflowModal = () => {
+    if (!workflowModal) {
+      return;
+    }
+
+    if (workflowModal.open && typeof workflowModal.close === "function") {
+      workflowModal.close();
+    } else {
+      workflowModal.removeAttribute("open");
+      document.documentElement.classList.remove("has-workflow-modal");
+      workflowModalReturnTarget?.focus?.();
+      workflowModalReturnTarget = null;
+    }
+  };
+
+  const openWorkflowModal = (plate, returnTarget) => {
+    const sourceImage = plate?.querySelector("img");
+
+    if (!workflowModal || !workflowModalImage || !workflowModalTitle || !sourceImage) {
+      return;
+    }
+
+    const title =
+      plate.querySelector("[data-workflow-modal-trigger]")?.getAttribute("data-workflow-title") ||
+      plate.querySelector("h3")?.textContent?.trim() ||
+      sourceImage.alt ||
+      "";
+
+    workflowModalReturnTarget = returnTarget;
+    workflowModalImage.src = sourceImage.currentSrc || sourceImage.src;
+    workflowModalImage.alt = sourceImage.alt || title;
+    workflowModalTitle.textContent = title;
+    document.documentElement.classList.add("has-workflow-modal");
+
+    if (typeof workflowModal.showModal === "function") {
+      workflowModal.showModal();
+    } else {
+      workflowModal.setAttribute("open", "");
+    }
+  };
+
+  workflowCarousel?.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const plate = target?.closest(".workflow-plate");
+
+    if (!plate || !workflowCarousel.contains(plate)) {
+      return;
+    }
+
+    openWorkflowModal(plate, plate.querySelector("[data-workflow-modal-trigger]"));
+  });
+
+  workflowModalClose?.addEventListener("click", closeWorkflowModal);
+
+  workflowModal?.addEventListener("click", (event) => {
+    if (event.target === workflowModal) {
+      closeWorkflowModal();
+    }
+  });
+
+  workflowModal?.addEventListener("cancel", () => {
+    document.documentElement.classList.remove("has-workflow-modal");
+  });
+
+  workflowModal?.addEventListener("close", () => {
+    document.documentElement.classList.remove("has-workflow-modal");
+    workflowModalReturnTarget?.focus?.();
+    workflowModalReturnTarget = null;
+  });
+
+  const flightButterfly = document.querySelector("[data-flight-butterfly]");
+  const landingZones = [...document.querySelectorAll("[data-butterfly-landing]")];
+  const siteHeader = document.querySelector(".site-header");
+  const brandLanding = landingZones.find((zone) => zone.closest(".site-header"));
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const flightDecisionRatioFromBottom = 0.15;
+  const headerReturnLead = 72;
+  const flightDurationMs = 1820;
+  let flightTimer;
+  let activeLanding = null;
+  let settledLanding = null;
+
+  const getFlightTargetName = (zone) => {
+    if (zone === brandLanding) {
+      return "brand";
+    }
+
+    return zone.closest("section")?.id || "content";
+  };
+
+  const updateFlightPath = () => {
+    if (!flightButterfly || landingZones.length === 0) {
+      return;
+    }
+
+    const targetY = window.innerHeight * (1 - flightDecisionRatioFromBottom);
+    const headerRect = siteHeader?.getBoundingClientRect();
+    const headerReturnY = (headerRect?.bottom ?? 0) + Math.max(headerReturnLead, (headerRect?.height ?? 64) * 1.1);
+    const visibleLandings = landingZones
+      .map((zone) => ({ zone, rect: zone.getBoundingClientRect() }))
+      .filter(({ rect }) => rect.width > 0 && rect.height > 0);
+    const brandLandingCandidate = visibleLandings.find(({ zone }) => zone === brandLanding);
+    const targetTolerance = 2;
+    const contentLandingCandidate = visibleLandings
+      .filter(({ zone, rect }) => zone !== brandLanding && rect.top <= targetY + targetTolerance && rect.top > headerReturnY)
+      .sort((a, b) => Math.abs(a.rect.top - targetY) - Math.abs(b.rect.top - targetY))[0];
+    const nextLanding =
+      contentLandingCandidate ||
+      brandLandingCandidate ||
+      visibleLandings.sort((a, b) => Math.abs(a.rect.top - targetY) - Math.abs(b.rect.top - targetY))[0];
+
+    if (!nextLanding) {
+      return;
+    }
+
+    const { rect, zone } = nextLanding;
+    const butterflyRect = flightButterfly.getBoundingClientRect();
+    const butterflyCenterX = butterflyRect.width / 2;
+    const butterflyCenterY = butterflyRect.height / 2;
+    const x = rect.left + rect.width / 2 - butterflyCenterX;
+    const y = rect.top + rect.height / 2 - butterflyCenterY;
+    const wasLanding = activeLanding;
+    const isInitialLanding = activeLanding === null;
+    const isNewLanding = wasLanding !== zone;
+    const wasTrackingSettledLanding = settledLanding === wasLanding;
+    const isTrackingLanding = settledLanding === zone;
+    const nextTransform = `translate3d(${x}px, ${y}px, 0) rotate(${Math.max(-14, Math.min(14, (rect.top - targetY) / 18))}deg)`;
+
+    if (isInitialLanding) {
+      activeLanding = zone;
+      settledLanding = zone;
+      flightButterfly.classList.remove("is-flying");
+      flightButterfly.classList.add("is-tracking");
+      flightButterfly.setAttribute("data-flight-target", getFlightTargetName(zone));
+      flightButterfly.style.transform = nextTransform;
+      return;
+    }
+
+    if (isNewLanding) {
+      settledLanding = null;
+      flightButterfly.classList.remove("is-tracking");
+      if (wasTrackingSettledLanding) {
+        void flightButterfly.offsetWidth;
+      }
+    } else {
+      flightButterfly.classList.toggle("is-tracking", isTrackingLanding);
+    }
+
+    activeLanding = zone;
+    flightButterfly.setAttribute("data-flight-target", getFlightTargetName(zone));
+    flightButterfly.style.transform = nextTransform;
+
+    if (!isTrackingLanding) {
+      if (prefersReducedMotion.matches) {
+        settledLanding = zone;
+        flightButterfly.classList.remove("is-flying");
+        flightButterfly.classList.add("is-tracking");
+        return;
+      }
+
+      window.clearTimeout(flightTimer);
+      flightButterfly.classList.add("is-flying");
+      flightTimer = window.setTimeout(() => {
+        if (activeLanding === zone) {
+          settledLanding = zone;
+          flightButterfly.classList.remove("is-flying");
+          flightButterfly.classList.add("is-tracking");
+        }
+      }, flightDurationMs);
+    }
+  };
+
+  let scheduledFlightUpdate = false;
+  const scheduleFlightUpdate = () => {
+    if (scheduledFlightUpdate) {
+      return;
+    }
+    scheduledFlightUpdate = true;
+    window.requestAnimationFrame(() => {
+      scheduledFlightUpdate = false;
+      updateFlightPath();
+    });
+  };
+
+  window.addEventListener("scroll", scheduleFlightUpdate, { passive: true });
+  window.addEventListener("resize", () => {
+    updateResponsiveImageLoading();
+    scheduleFlightUpdate();
+  });
+  updateResponsiveImageLoading();
+  updateFlightPath();
 </script>

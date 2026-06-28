@@ -1,11 +1,18 @@
 ---
-import { site } from "@/data/site";
+import { getLatestReleaseFooter } from "@/data/latest-release.mjs";
+
+const latestRelease = await getLatestReleaseFooter();
 ---
 
 <footer class="site-footer">
   <div>
-    <img src="/assets/brand/aao-icon-white.svg" alt="" width="36" height="36" />
-    <p>Developed and maintained by the AAO.sh Community. Released under the MIT License.</p>
+    <a class="footer-brand-link" href="https://aao.sh" aria-label="AAO.sh">
+      <img src="/assets/brand/aao-icon-white.svg" alt="" width="36" height="36" loading="lazy" decoding="async" />
+    </a>
+    <p>
+      Developed and maintained by the <a href="https://github.com/aao-sh/fable-harness/graphs/contributors">AAO.sh Community</a>.<br />
+      Released under the <a href="https://github.com/aao-sh/fable-harness/blob/main/LICENSE">MIT License</a>.
+    </p>
   </div>
-  <a href={site.meta.repoUrl}>github.com/AAO-SH/fable-harness</a>
+  <a href={latestRelease.url}>{latestRelease.label}</a>
 </footer>

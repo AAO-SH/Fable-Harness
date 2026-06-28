@@ -1,23 +1,51 @@
 ---
+import { Image } from "astro:assets";
 import type { Workflow } from "@/data/site";
+import memoryWorkflow from "@/assets/workflows/01-memory.png";
+import planningWorkflow from "@/assets/workflows/02-planning.png";
+import decisionLoopWorkflow from "@/assets/workflows/03-decision-loop.png";
+import taskParallelismWorkflow from "@/assets/workflows/04-task-parallelism.png";
+import rollbackWorkflow from "@/assets/workflows/06-rollback.png";
 
 interface Props {
   workflow: Workflow;
-  index: number;
+  index?: number;
+  interactive?: boolean;
 }
 
-const { workflow, index } = Astro.props;
+const { workflow, interactive = true } = Astro.props;
+
+const workflowImages = {
+  memory: memoryWorkflow,
+  planning: planningWorkflow,
+  "decision-loop": decisionLoopWorkflow,
+  "task-parallelism": taskParallelismWorkflow,
+  rollback: rollbackWorkflow,
+};
+
+const workflowImage = workflowImages[workflow.slug as keyof typeof workflowImages];
+const imageAlt = `${workflow.title} workflow diagram`;
 ---
 
 <article class="workflow-plate">
-  <div class="workflow-image-frame">
-    <img src={workflow.image} alt={`${workflow.title} workflow diagram`} loading="lazy" decoding="async" />
-  </div>
-  <div class="workflow-body">
-    <p class="plate-number">Plate {String(index + 1).padStart(2, "0")}</p>
-    <h3>{workflow.title}</h3>
-    <p class="mechanism">{workflow.mechanism}</p>
-    <p>{workflow.description}</p>
-    <p class="best-for">{workflow.bestFor}</p>
+  {interactive && (
+    <button
+      class="workflow-plate-trigger"
+      type="button"
+      data-workflow-modal-trigger
+      data-workflow-title={workflow.title}
+      aria-label={`Open ${workflow.title} workflow preview`}
+    ></button>
+  )}
+  <div class="workflow-plate-content">
+    <div class="workflow-image-frame">
+      <Image src={workflowImage} alt={interactive ? imageAlt : ""} loading="lazy" decoding="async" />
+    </div>
+    <div class="workflow-body">
+      <h3>{workflow.title}</h3>
+      <p class="mechanism">{workflow.mechanism}</p>
+      <p>{workflow.description}</p>
+      <p class="best-for">{workflow.bestFor}</p>
+    </div>
   </div>
 </article>

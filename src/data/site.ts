@@ -5,8 +5,8 @@ export const site = {
       "Fable Harness gives AI coding agents project-local memory, planning, verification, decision loops, parallel work discipline, and selective rollback.",
     url: "https://fable.aao.sh",
     image: "/assets/art/og-image.png",
-    repoUrl: "https://github.com/AAO-SH/fable-harness",
-    licenseUrl: "https://github.com/AAO-SH/fable-harness/blob/main/LICENSE",
+    repoUrl: "https://github.com/aao-sh/fable-harness",
+    licenseUrl: "https://github.com/aao-sh/fable-harness/blob/main/LICENSE",
   },
   sections: {
     why: { id: "why", label: "Why" },
@@ -17,15 +17,13 @@ export const site = {
     faq: { id: "faq", label: "FAQ" },
   },
   hero: {
-    eyebrow: "The Trace Engine Field Manual",
+    eyebrow: "The Trace Engine",
     title: "Fable Harness",
-    description:
-      "A project-local operating layer for AI agents: memory, planning, verification, decision loops, parallel work, and rollback.",
+    description: "A system that teaches AI agents to organize memory context into traces and manageable notes.",
     promptCommand:
       "Install the Fable-Harness skill (https://github.com/aao-sh/fable-harness) and run it to set up this workspace.",
-    manualCommand: 'npx @aao-sh/fable-harness "./path/to/project" --agent auto',
     primaryCta: "Install by prompt",
-    secondaryCta: "View on GitHub",
+    secondaryCta: "GitHub repo",
     metrics: [
       { value: "Local", label: "context and memory stay in the workspace" },
       { value: "Traceable", label: "decisions become reviewable evidence" },
@@ -51,7 +49,6 @@ export const site = {
       slug: "memory",
       title: "Memory",
       mechanism: "Archive cylinder",
-      image: "/assets/workflows/01-memory.png",
       description:
         "Compact semantic notes preserve durable project knowledge while traces remain audit evidence.",
       bestFor:
@@ -61,7 +58,6 @@ export const site = {
       slug: "planning",
       title: "Planning",
       mechanism: "Drafting compass",
-      image: "/assets/workflows/02-planning.png",
       description:
         "Plans start from instructions, notes, docs, source files, citations, and graph orientation.",
       bestFor:
@@ -71,7 +67,6 @@ export const site = {
       slug: "decision-loop",
       title: "Decision Loop",
       mechanism: "Calibrated orrery",
-      image: "/assets/workflows/03-decision-loop.png",
       description:
         "Orient, inspect, decide, act, verify, and report with explicit closure checks.",
       bestFor:
@@ -81,7 +76,6 @@ export const site = {
       slug: "task-parallelism",
       title: "Task Parallelism",
       mechanism: "Split-drive governor",
-      image: "/assets/workflows/04-task-parallelism.png",
       description:
         "Independent domains can move in waves while dependent loop steps stay ordered.",
       bestFor:
@@ -91,7 +85,6 @@ export const site = {
       slug: "rollback",
       title: "Rollback",
       mechanism: "Reverse ratchet",
-      image: "/assets/workflows/06-rollback.png",
       description:
         "Selective rollback plans, checkpoints, backups, and reverse patches keep unrelated work intact.",
       bestFor:
@@ -159,13 +152,18 @@ export const site = {
     },
   ],
   community: {
-    kicker: "Open source",
-    title: "Built for agents that need to leave evidence behind.",
+    kicker: "Community",
+    title: "Join the community and help build open source together.",
     links: [
-      { label: "GitHub", href: "https://github.com/AAO-SH/fable-harness" },
-      { label: "MIT License", href: "https://github.com/AAO-SH/fable-harness/blob/main/LICENSE" },
-      { label: "Telegram", href: "https://telegram.aao.sh" },
-      { label: "Discord", href: "https://discord.aao.sh" },
+      { label: "Discord", href: "https://discord.aao.sh", icon: "discord" },
+      { label: "Telegram", href: "https://telegram.aao.sh", icon: "telegram" },
+      { label: "GitHub", href: "https://github.com/aao-sh", icon: "github" },
+      {
+        label: "Organization",
+        href: "https://aao.sh",
+        icon: "organization",
+        iconSrc: "/assets/brand/aao-icon-white.svg",
+      },
     ],
   },
   faqs: [

@@ -1,18 +1,75 @@
 ---
+import { Image } from "astro:assets";
 import { site } from "@/data/site";
+import steampunkButterfly from "@/assets/brand/steampunk-butterfly.webp";
 ---
 
 <header class="site-header">
-  <a class="brand" href="/" aria-label="Fable Harness home">
-    <img src="/assets/brand/fable-harness-logo.svg" alt="" width="170" height="36" />
+  <a class="aao-link" href="https://aao.sh" aria-label="AAO home">
+    <img
+      src="/assets/brand/aao-icon-white.svg"
+      data-aao-icon
+      data-aao-icon-dark="/assets/brand/aao-icon-white.svg"
+      data-aao-icon-light="/assets/brand/aao-icon-black.svg"
+      alt=""
+      width="24"
+      height="26"
+      loading="eager"
+      decoding="async"
+    />
   </a>
-  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false" data-nav-toggle>
-    Menu
-  </button>
+  <a class="brand" href="/" aria-label="Fable Harness home" data-butterfly-landing>
+    <span class="brand-butterfly" aria-hidden="true"></span>
+    <span class="sr-only">Fable Harness</span>
+  </a>
+  <div class="header-controls">
+    <button
+      class="theme-toggle"
+      type="button"
+      aria-label="Switch to light mode"
+      aria-pressed="false"
+      data-theme-toggle
+    >
+      <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+      </span>
+      <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M20.8 13.5A7.6 7.6 0 0 1 10.5 3.2a8.7 8.7 0 1 0 10.3 10.3Z"></path>
+        </svg>
+      </span>
+    </button>
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false" data-nav-toggle>
+      Menu
+    </button>
+  </div>
   <nav class="primary-nav" aria-label="Primary" data-open="false" data-primary-nav>
-    {Object.values(site.sections).map((item) => (
-      <a href={`#${item.id}`}>{item.label}</a>
-    ))}
+    {Object.values(site.sections)
+      .filter(
+        (item) =>
+          ![
+            site.sections.install.id,
+            site.sections.workflows.id,
+            site.sections.evidence.id,
+            site.sections.faq.id,
+          ].includes(item.id)
+      )
+      .map((item) => (
+        <a href={`#${item.id}`}>{item.label}</a>
+      ))}
     <a class="nav-repo" href={site.meta.repoUrl}>GitHub</a>
   </nav>
 </header>
+
+<div class="flight-butterfly" aria-hidden="true" data-flight-butterfly>
+  <Image
+    class="flight-butterfly-mark"
+    src={steampunkButterfly}
+    alt=""
+    loading="eager"
+    decoding="async"
+  />
+</div>

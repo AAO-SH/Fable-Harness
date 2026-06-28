@@ -7,19 +7,20 @@ import "@fontsource/cinzel/700.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "@/styles/global.css";
 
+import CommunityIcon from "@/components/CommunityIcon.astro";
 import EvidenceLoop from "@/components/EvidenceLoop.astro";
 import Faq from "@/components/Faq.astro";
 import Footer from "@/components/Footer.astro";
 import Hero from "@/components/Hero.astro";
-import InstallPanel from "@/components/InstallPanel.astro";
 import Nav from "@/components/Nav.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
 import SiteScript from "@/components/SiteScript.astro";
 import WorkflowPlate from "@/components/WorkflowPlate.astro";
 import { site } from "@/data/site";
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -32,7 +33,7 @@ import { site } from "@/data/site";
     <meta property="og:url" content={site.meta.url} />
     <meta property="og:image" content={`${site.meta.url}${site.meta.image}`} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#2f261d" />
+    <meta name="theme-color" content="#16120e" />
     <link rel="icon" type="image/png" href="/assets/brand/fable-harness-icon-192.png" />
     <link rel="manifest" href="/site.webmanifest" />
   </head>
@@ -42,11 +43,8 @@ import { site } from "@/data/site";
       <Hero />
 
       <section id={site.sections.why.id} class="section-shell problem-section" aria-labelledby="why-title">
-        <div class="section-heading">
-          <p class="eyebrow">{site.why.kicker}</p>
-          <h2 id="why-title">{site.why.title}</h2>
-          <p>{site.why.intro}</p>
-        </div>
+        <span class="butterfly-landing" data-butterfly-landing aria-hidden="true"></span>
+        <SectionHeading eyebrow={site.why.kicker} title={site.why.title} headingId="why-title" body={site.why.intro} />
         <div class="problem-grid">
           <div class="problem-list">
             {site.why.problems.map((problem) => (
@@ -60,38 +58,57 @@ import { site } from "@/data/site";
         </div>
       </section>
 
-      <section id={site.sections.install.id} class="section-shell install-section" aria-labelledby="install-title">
-        <div class="section-heading narrow">
-          <p class="eyebrow">{site.install.kicker}</p>
-          <h2 id="install-title">{site.install.title}</h2>
-        </div>
-        <InstallPanel />
-      </section>
-
       <section id={site.sections.workflows.id} class="section-shell workflows-section" aria-labelledby="workflows-title">
-        <div class="section-heading">
-          <p class="eyebrow">Main workflows</p>
-          <h2 id="workflows-title">Five calibrated mechanisms for agent work.</h2>
-          <p>
-            Each workflow turns an otherwise fuzzy agent behavior into a visible, reviewable project operation.
-          </p>
+        <span class="butterfly-landing" data-butterfly-landing aria-hidden="true"></span>
+        <SectionHeading
+          eyebrow="Main workflows"
+          title="Five calibrated mechanisms for agent work."
+          headingId="workflows-title"
+          body="Each workflow turns an otherwise fuzzy agent behavior into a visible, reviewable project operation."
+        />
+        <div class="workflow-grid workflow-carousel" data-workflow-carousel>
+          <div class="workflow-track">
+            <div class="workflow-slide-set">
+              {site.workflows.map((workflow, index) => (
+                <WorkflowPlate workflow={workflow} index={index} />
+              ))}
+            </div>
+            <div class="workflow-slide-set" aria-hidden="true">
+              {site.workflows.map((workflow, index) => (
+                <WorkflowPlate workflow={workflow} index={index} interactive={false} />
+              ))}
+            </div>
+          </div>
         </div>
-        <div class="workflow-grid">
-          {site.workflows.map((workflow, index) => (
-            <WorkflowPlate workflow={workflow} index={index} />
-          ))}
-        </div>
+        <dialog class="workflow-modal" data-workflow-modal aria-labelledby="workflow-modal-title">
+          <div class="workflow-modal-panel">
+            <button
+              class="workflow-modal-close"
+              type="button"
+              data-workflow-modal-close
+              aria-label="Close workflow preview"
+            >
+              Close
+            </button>
+            <img
+              class="workflow-modal-image"
+              data-workflow-modal-image
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+              alt=""
+            />
+            <p id="workflow-modal-title" class="workflow-modal-title" data-workflow-modal-title></p>
+          </div>
+        </dialog>
       </section>
 
-      <section id={site.sections.evidence.id} class="section-shell evidence-section" aria-labelledby="evidence-title">
-        <div class="section-heading narrow">
-          <p class="eyebrow">{site.evidence.kicker}</p>
-          <h2 id="evidence-title">{site.evidence.title}</h2>
-        </div>
+      <section id={site.sections.evidence.id} class="section-shell evidence-section" aria-labelledby="evidence-title" hidden>
+        <span class="butterfly-landing" data-butterfly-landing aria-hidden="true"></span>
+        <SectionHeading eyebrow={site.evidence.kicker} title={site.evidence.title} headingId="evidence-title" narrow />
         <EvidenceLoop />
       </section>
 
       <section id={site.sections.community.id} class="section-shell community-section" aria-labelledby="community-title">
+        <span class="butterfly-landing" data-butterfly-landing aria-hidden="true"></span>
         <div class="community-card">
           <div>
             <p class="eyebrow">{site.community.kicker}</p>
@@ -99,11 +116,14 @@ import { site } from "@/data/site";
           </div>
           <div class="community-links">
             {site.community.links.map((link) => (
-              <a href={link.href}>{link.label}</a>
+              <a href={link.href}>
+                <CommunityIcon icon={link.icon} iconSrc={link.iconSrc} />
+                <span>{link.label}</span>
+              </a>
             ))}
           </div>
         </div>
-        <div class="plugin-panel">
+        <div class="plugin-panel" hidden>
           {site.plugins.map((plugin) => (
             <article>
               <h3>{plugin.name}</h3>
@@ -113,11 +133,8 @@ import { site } from "@/data/site";
         </div>
       </section>
 
-      <section id={site.sections.faq.id} class="section-shell faq-section" aria-labelledby="faq-title">
-        <div class="section-heading narrow">
-          <p class="eyebrow">FAQ</p>
-          <h2 id="faq-title">Adoption questions, answered compactly.</h2>
-        </div>
+      <section id={site.sections.faq.id} class="section-shell faq-section" aria-labelledby="faq-title" hidden>
+        <SectionHeading eyebrow="FAQ" title="Adoption questions." headingId="faq-title" narrow />
         <Faq />
       </section>
     </main>
